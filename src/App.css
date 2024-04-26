@@ -1,0 +1,42 @@
+.App {
+  text-align: center;
+  display: grid;
+}
+
+.teste {
+  border: 2px solid;
+  width: 80%;
+  height: 80vh;
+  justify-self: center;
+  display: flex;
+}
+
+.left{
+  border: 2px solid;
+  height: 80vh;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+}
+
+.rigth {
+  border: 2px solid;
+  height: 80vh;
+  width: 70%;
+  display: flex;
+}
+
+.itemDrop {
+  border: 1px solid red;
+  height: 20%;
+  width: 20%;
+  margin: 25px;
+  border-radius: 10px;
+}
+
+.itemDrag {
+  border: 1px solid red;
+  height: 50px;
+  margin: 10px 25px;
+  border-radius: 5px;
+}
