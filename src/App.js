@@ -1,5 +1,9 @@
 import "./App.css";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import { Container } from "./components/teste";
+
 
 function App() {
   const [drag, setDrag] = useState([]);
@@ -9,18 +13,22 @@ function App() {
     <div className="App">
       <div className="teste">
         <div className="left">
-          {drag.map((item) => {
+
+          <DndProvider backend={HTML5Backend}>
+            <Container/>
+          </DndProvider>
+          {/* {drag.map((item) => {
             <div className="itemDrag">
               <span>{item.name}</span>
-            </div>;
-          })}
+            </div>
+          })} */}
         </div>
 
         <div className="rigth">
           {drop.map((item) => {
             <div className="itemDrop">
               <span>{item.name}</span>
-            </div>;
+            </div>
           })}
         </div>
       </div>
