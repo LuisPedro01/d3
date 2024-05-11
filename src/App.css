@@ -5,10 +5,12 @@
 
 .teste {
   border: 2px solid;
-  /* width: 80%; */
+  width: 90%;
   height: 80vh;
   justify-self: center;
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .left{

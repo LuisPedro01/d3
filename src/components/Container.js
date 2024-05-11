@@ -1,26 +1,30 @@
-// import './container.scss';
+//container.js
 import update from 'immutability-helper';
 import { memo, useCallback, useState } from 'react';
-import { NativeTypes } from 'react-dnd-html5-backend';
 import { Dustbin } from './dustbin.js';
-import { ItemTypes } from './ItemTypes.js';
 import { Box } from './Box.js';
+import { ItemTypes } from './ItemTypes.js';
+import axios from 'axios';
+import * as d3 from 'd3';
+
 
 export const Container = memo(function Container() {
   const [dustbins, setDustbins] = useState([
-    { accepts: [ItemTypes.GLASS], lastDroppedItem: null },
-    { accepts: [ItemTypes.FOOD], lastDroppedItem: null },
-    {
-      accepts: [ItemTypes.PAPER, ItemTypes.GLASS, NativeTypes.URL],
-      lastDroppedItem: null,
-    },
-    { accepts: [ItemTypes.PAPER, NativeTypes.FILE], lastDroppedItem: null },
+    { accepts: ['TODOS'], lastDroppedItem: null },
+    { accepts: ['TODOS'], lastDroppedItem: null },
+    { accepts: ['TODOS'], lastDroppedItem: null },
+    { accepts: ['TODOS'], lastDroppedItem: null },
+    { accepts: ['TODOS'], lastDroppedItem: null },
+    { accepts: ['TODOS'], lastDroppedItem: null },
+    { accepts: ['TODOS'], lastDroppedItem: null },
+    { accepts: ['TODOS'], lastDroppedItem: null },
   ]);
+  
 
-  const [boxes] = useState([
-    { name: 'Bottle', type: ItemTypes.GLASS },
-    { name: 'Banana', type: ItemTypes.FOOD },
-    { name: 'Magazine', type: ItemTypes.PAPER },
+  const [boxes, setBoxes] = useState([
+    { name: 'Bottle', type: 'TODOS' },
+    { name: 'Banana', type: 'TODOS' },
+    { name: 'Magazine', type: 'TODOS' },
   ]);
 
   const [droppedBoxNames, setDroppedBoxNames] = useState([]);
@@ -30,13 +34,13 @@ export const Container = memo(function Container() {
   }
 
   const handleDrop = useCallback(
-    (index, item) => {
+    async (index, item) => {
       const { name } = item;
-      setDroppedBoxNames(
-        update(droppedBoxNames, name ? { $push: [name] } : { $push: [] })
+      setDroppedBoxNames((prevNames) =>
+        update(prevNames, name ? { $push: [name] } : { $push: [] })
       );
-      setDustbins(
-        update(dustbins, {
+      setDustbins((prevDustbins) =>
+        update(prevDustbins, {
           [index]: {
             lastDroppedItem: {
               $set: item,
@@ -45,18 +49,34 @@ export const Container = memo(function Container() {
         })
       );
     },
-    [droppedBoxNames, dustbins]
+    [setDroppedBoxNames, setDustbins]
   );
 
+  const addNewGraph = () => {
+    setBoxes((prevBoxes) =>
+      update(prevBoxes, {
+        $push: [{ name: 'Bottle', type: ItemTypes.TODOS }],
+      })
+    );
+  };
+
   return (
-    <div style={{display: 'flex', width: '100%' }}>
-      <div style={{ border: '2px solid blue', display: 'flex', flexDirection: 'column', padding: '10px'}}>
+    <div style={{display: 'flex', width: '100%', height: '100%' }}>
+      <div style={{ border: '2px solid blue', display: 'flex', flexDirection: 'column', padding: '10px', width: '500px'}}>
+
+        <div style={{marginBottom: '20px', cursor: 'pointer'}}>
+          <span onClick={addNewGraph}>Create new Graph</span>
+        </div>
         {boxes.map(({ name, type }, index) => (
           <Box name={name} type={type} isDropped={isDropped(name)} key={index} />
         ))}
       </div>
 
-      <div style={{ border: '3px solid red', marginRight: 'auto'}} className='graficos'>
+      <div style={{ border: '3px solid red' }} className='graficos'>
+
+        <div style={{marginBottom: '20px', marginTop: '20px'}}>
+          <span>Lista de Gráficos</span>
+        </div>
         {dustbins.map(({ accepts, lastDroppedItem }, index) => (
           <Dustbin
             accept={accepts}

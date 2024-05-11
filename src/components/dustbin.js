@@ -1,11 +1,13 @@
+// dustbin.js
 import React, { memo, useState } from 'react';
 import { useDrop } from 'react-dnd';
+import * as d3 from 'd3';
+import axios from 'axios';
 
 const style = {
-  height: '100px',
-  width: '100px',
-  marginRight: '20px',
-  marginBottom: '20x',
+  height: '280px',
+  width: '280px',
+  margin: '20px',
   color: 'white',
   padding: '10px',
   textAlign: 'center',
@@ -28,9 +30,8 @@ export const Dustbin = memo(function Dustbin({
     }),
   });
 
-  const [graficos, setGraficos] = useState([])
+  const [graficos, setGraficos] = useState([]);
 
-  
   const isActive = isOver && canDrop;
   let backgroundColor = '#222';
   if (isActive) {
@@ -39,15 +40,53 @@ export const Dustbin = memo(function Dustbin({
     backgroundColor = 'darkkhaki';
   }
 
-  return (
-    <div ref={drop} style={{ ...style, backgroundColor }} data-testid="dustbin">
-      {console.log('accept', accept)}
-      {isActive
-        ? 'Release to drop'
-        : `Gráfico 1: ${accept.join(', ')}`}
 
+  async function fetchData() {
+    try {
+      const response = await axios.get('https://api.spacexdata.com/v4/launches');
+      const allLaunches = response.data;
+      const latestLaunches = allLaunches.slice(-20); // Retorna os últimos 20 lançamentos
+      return latestLaunches;
+    } catch (error) {
+      console.error('Erro ao buscar dados da API da SpaceX:', error);
+      return [];
+    }
+  }
+  
+
+  const createBarChart = () => {
+    // Simples exemplo de gráfico
+    const data = [10, 20, 30, 40, 50];
+
+    const svg = d3
+      .create('svg')
+      .attr('width', 230)
+      .attr('height', 230);
+
+    const bars = svg
+      .selectAll('rect')
+      .data(data)
+      .enter()
+      .append('rect')
+      .attr('x', (d, i) => i * 40)
+      .attr('y', (d) => 250 - d * 4)
+      .attr('width', 35)
+      .attr('height', (d) => d * 4)
+      .attr('fill', 'steelblue');
+
+    return svg.node().outerHTML;
+  };
+
+  return (
+    <div
+      ref={drop}
+      style={{ ...style, backgroundColor }}
+      data-testid="dustbin"
+    >
+      {isActive ? 'Release to drop' : `Gráfico 1: ${accept.join(', ')}`}
+      {lastDroppedItem && <p>Last dropped: {JSON.stringify(lastDroppedItem)}</p>}
       {lastDroppedItem && (
-        <p>Last dropped: {JSON.stringify(lastDroppedItem)}</p>
+        <div dangerouslySetInnerHTML={{ __html: createBarChart() }} />
       )}
     </div>
   );
