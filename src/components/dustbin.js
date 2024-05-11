@@ -62,7 +62,8 @@ export const Dustbin = memo(function Dustbin({
     const svg = d3
       .create('svg')
       .attr('width', 200)
-      .attr('height', 250);
+      .attr('height', 250)
+      .style('margin-top', -30);
 
     const bars = svg
       .selectAll('rect')
