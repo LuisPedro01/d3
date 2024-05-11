@@ -1,15 +1,15 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
 const style = {
-  height: '12rem',
-  width: '12rem',
-  marginRight: '1.5rem',
-  marginBottom: '1.5rem',
+  height: '100px',
+  width: '100px',
+  marginRight: '20px',
+  marginBottom: '20x',
   color: 'white',
-  padding: '1rem',
+  padding: '10px',
   textAlign: 'center',
-  fontSize: '1rem',
+  fontSize: '10px',
   lineHeight: 'normal',
   float: 'left',
 };
@@ -28,6 +28,9 @@ export const Dustbin = memo(function Dustbin({
     }),
   });
 
+  const [graficos, setGraficos] = useState([])
+
+  
   const isActive = isOver && canDrop;
   let backgroundColor = '#222';
   if (isActive) {
@@ -38,9 +41,10 @@ export const Dustbin = memo(function Dustbin({
 
   return (
     <div ref={drop} style={{ ...style, backgroundColor }} data-testid="dustbin">
+      {console.log('accept', accept)}
       {isActive
         ? 'Release to drop'
-        : `This dustbin accepts: ${accept.join(', ')}`}
+        : `Gráfico 1: ${accept.join(', ')}`}
 
       {lastDroppedItem && (
         <p>Last dropped: {JSON.stringify(lastDroppedItem)}</p>

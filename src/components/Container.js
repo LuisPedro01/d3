@@ -1,3 +1,4 @@
+// import './container.scss';
 import update from 'immutability-helper';
 import { memo, useCallback, useState } from 'react';
 import { NativeTypes } from 'react-dnd-html5-backend';
@@ -48,8 +49,14 @@ export const Container = memo(function Container() {
   );
 
   return (
-    <div>
-      <div style={{ overflow: 'hidden', clear: 'both' }}>
+    <div style={{display: 'flex', width: '100%' }}>
+      <div style={{ border: '2px solid blue', display: 'flex', flexDirection: 'column', padding: '10px'}}>
+        {boxes.map(({ name, type }, index) => (
+          <Box name={name} type={type} isDropped={isDropped(name)} key={index} />
+        ))}
+      </div>
+
+      <div style={{ border: '3px solid red', marginRight: 'auto'}} className='graficos'>
         {dustbins.map(({ accepts, lastDroppedItem }, index) => (
           <Dustbin
             accept={accepts}
@@ -57,12 +64,6 @@ export const Container = memo(function Container() {
             onDrop={(item) => handleDrop(index, item)}
             key={index}
           />
-        ))}
-      </div>
-
-      <div style={{ overflow: 'hidden', clear: 'both' }}>
-        {boxes.map(({ name, type }, index) => (
-          <Box name={name} type={type} isDropped={isDropped(name)} key={index} />
         ))}
       </div>
     </div>
