@@ -11,9 +11,10 @@ const style = {
   color: 'white',
   padding: '10px',
   textAlign: 'center',
-  fontSize: '10px',
+  fontSize: '12px',
   lineHeight: 'normal',
   float: 'left',
+  borderRadius: '10px'
 };
 
 export const Dustbin = memo(function Dustbin({
@@ -33,7 +34,7 @@ export const Dustbin = memo(function Dustbin({
   const [graficos, setGraficos] = useState([]);
 
   const isActive = isOver && canDrop;
-  let backgroundColor = '#222';
+  let backgroundColor = '#aeafb0';
   if (isActive) {
     backgroundColor = 'darkgreen';
   } else if (canDrop) {
@@ -60,8 +61,8 @@ export const Dustbin = memo(function Dustbin({
 
     const svg = d3
       .create('svg')
-      .attr('width', 230)
-      .attr('height', 230);
+      .attr('width', 200)
+      .attr('height', 250);
 
     const bars = svg
       .selectAll('rect')

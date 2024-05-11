@@ -5,7 +5,8 @@
 
 .teste {
   width: 90%;
-  height: 80vh;
+  margin-top: 50px;
+  /* height: 100%; */
   justify-self: center;
   display: flex;
   align-items: center;
