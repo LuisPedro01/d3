@@ -19,18 +19,20 @@ export const Container = memo(function Container() {
     { accepts: ['TODOS'], lastDroppedItem: null },
     { accepts: ['TODOS'], lastDroppedItem: null },
   ]);
-  const [boxes, setBoxes] = useState([
-    { name: 'Bottle', type: 'TODOS' },
-    { name: 'Banana', type: 'TODOS' },
-    { name: 'Magazine', type: 'TODOS' },
-  ]);
+  const [boxes, setBoxes] = useState([]);
   const [droppedBoxNames, setDroppedBoxNames] = useState([]);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [name, setName] = useState('')
+  const [selectedOption, setSelectedOption] = useState('capsules');
 
   function isDropped(boxName) {
     return droppedBoxNames.indexOf(boxName) > -1;
   }
+
+  const handleSelectChange = (event) => {
+    setSelectedOption(event.target.value);
+  };
 
   const handleDrop = useCallback(
     async (index, item) => {
@@ -52,9 +54,15 @@ export const Container = memo(function Container() {
   );
 
   const addNewGraph = () => {
+    console.log(name)
+    console.log(selectedOption)
+    console.log(startDate)
+    console.log(endDate)
+
+
     setBoxes((prevBoxes) =>
       update(prevBoxes, {
-        $push: [{ name: 'Bottle', type: ItemTypes.TODOS }],
+        $push: [{ name: name, type:'TODOS', selectedOption: selectedOption, startDate: startDate, endDate: endDate}],
       })
     );
   };
@@ -71,25 +79,25 @@ export const Container = memo(function Container() {
         }}
       >
         {/* Nome Gráfico */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: '20px' }}>
-          <span>Nome do Gráfico:</span>
-          <input type={'text'} style={{height: '20px', border: '1px solid', borderRadius: '5px'}}></input>
+        <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: '15px' }}>
+          <span>Nome do Gráfico</span>
+          <input type={'text'} style={{height: '20px', border: '2px solid #9dadb3', borderRadius: '5px', padding:'5px'}} onChange={(event) => setName(event.target.value)} placeholder={'Insira aqui o nome do gráfico'}></input>
         </div>
 
 
         {/* Filtro Datas */}
         <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-          <span>Data Inicio:</span>
+          <span>Data Inicio</span>
           <ReactDatePicker
             selected={startDate}
             onChange={(date) => setStartDate(date)}
             dateFormat="dd/MM/yyyy"
             className='datePicker'
           />
-          <span>Data Fim:</span>
+          <span>Data Fim</span>
           <ReactDatePicker
             selected={startDate}
-            onChange={(date) => setStartDate(date)}
+            onChange={(date) => setEndDate(date)}
             dateFormat="dd/MM/yyyy"
             className='datePicker'
           />
@@ -99,39 +107,50 @@ export const Container = memo(function Container() {
         <div
           style={{ display: "flex", marginTop: "20px", marginBottom: "20px", alignItems: 'center' }}
         >
-          <span>Tipo de gráfico:</span>
-          <select style={{width: '120px', height: '30px', borderRadius: '5px'}}>
-            <option value="fruit">Capsules</option>
-            <option value="vegetable">Cores</option>
-            <option value="meat">Dragons</option>
-            <option value="meat">History</option>
-            <option value="meat">Info</option>
-            <option value="meat">Landing Pads</option>
-            <option value="meat">Launches</option>
-            <option value="meat">Launches Pads</option>
-            <option value="meat">Missions</option>
-            <option value="meat">Payloads</option>
-            <option value="meat">Rockets</option>
-            <option value="meat">Roadster</option>
-            <option value="meat">Ships</option>
+          <span>Variável</span>
+          <select 
+            style={{width: '150px', height: '30px', borderRadius: '5px', marginLeft: '20px', border: '2px solid #9dadb3'}}
+            value={selectedOption}
+            onChange={handleSelectChange}
+          >
+            <option value="capsules">Capsules</option>
+            <option value="cores">Cores</option>
+            <option value="dragons">Dragons</option>
+            <option value="history">History</option>
+            <option value="info">Info</option>
+            <option value="landing_pads">Landing Pads</option>
+            <option value="launches">Launches</option>
+            <option value="launches_pads">Launches Pads</option>
+            <option value="missions">Missions</option>
+            <option value="payloads">Payloads</option>
+            <option value="rockets">Rockets</option>
+            <option value="roadster">Roadster</option>
+            <option value="ships">Ships</option>
           </select>
         </div>
 
         {/* Criar Gráfico */}
-        <div style={{ marginBottom: "10px", cursor: "pointer", border: '2px solid blue', borderRadius: '5px' }}>
-          <span onClick={addNewGraph}>Create new Graph</span>
+        <div style={{display: 'flex', justifyContent: 'center'}}>
+          <div style={{ marginBottom: "10px", cursor: "pointer", border: '2px solid #1ebffa', borderRadius: '5px', backgroundColor: '#2abff5', padding: '5px', width: '70%', justifyItems: 'center' }}>
+            <span onClick={addNewGraph} style={{color: '#ffff'}}>Criar novo gráfico</span>
+          </div>
         </div>
 
         <hr style={{width: '100%', marginBottom: '20px'}}></hr>
 
-        {boxes.map(({ name, type }, index) => (
-          <Box
-            name={name}
-            type={type}
-            isDropped={isDropped(name)}
-            key={index}
-          />
-        ))}
+        {boxes.length > 0 ? 
+          boxes.map(({ name, type }, index) => (
+            <Box
+              name={name}
+              type={type}
+              isDropped={isDropped(name)}
+              key={index}
+            />
+          )) : 
+          <span style={{color: '#aeafb0'}}>Os seus gráficos aparecerão aqui...</span>
+        }
+
+        
       </div>
 
       <div style={{ border: "1px solid" }}>
