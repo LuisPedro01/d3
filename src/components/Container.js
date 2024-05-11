@@ -59,13 +59,21 @@ export const Container = memo(function Container() {
     console.log(startDate)
     console.log(endDate)
 
-
-    setBoxes((prevBoxes) =>
-      update(prevBoxes, {
-        $push: [{ name: name, type:'TODOS', selectedOption: selectedOption, startDate: startDate, endDate: endDate}],
-      })
-    );
+    if(!hasErrors()){
+      setBoxes((prevBoxes) =>
+        update(prevBoxes, {
+          $push: [{ name: name, type:'TODOS', selectedOption: selectedOption, startDate: startDate, endDate: endDate}],
+        })
+      );
+    }
   };
+
+  const hasErrors = () => {
+    if(!name){
+      alert('É necessário um nome!')
+      return true
+    }
+  }
 
   return (
     <div style={{ display: "flex", width: "100%", height: "100%" }}>
