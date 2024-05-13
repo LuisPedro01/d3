@@ -1,4 +1,3 @@
-// dustbin.js
 import React, { memo, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import * as d3 from 'd3';
@@ -31,8 +30,6 @@ export const Dustbin = memo(function Dustbin({
     }),
   });
 
-  const [graficos, setGraficos] = useState([]);
-
   const isActive = isOver && canDrop;
   let backgroundColor = '#aeafb0';
   if (isActive) {
@@ -46,7 +43,7 @@ export const Dustbin = memo(function Dustbin({
     try {
       const response = await axios.get('https://api.spacexdata.com/v4/launches');
       const allLaunches = response.data;
-      const latestLaunches = allLaunches.slice(-20); // Retorna os últimos 20 lançamentos
+      const latestLaunches = allLaunches.slice(-20);
       return latestLaunches;
     } catch (error) {
       console.error('Erro ao buscar dados da API da SpaceX:', error);
@@ -57,9 +54,7 @@ export const Dustbin = memo(function Dustbin({
 
   const createChart = (lastDroppedItem) => {
     let data;
-    let drawChart;
-  
-    // Determina os dados e a função de desenho com base no valor de lastDroppedItem
+    let drawChart;  
     switch (lastDroppedItem) {
       case "linhas":
         data = [10, 20, 30, 40, 50];
@@ -81,17 +76,10 @@ export const Dustbin = memo(function Dustbin({
         data = [10, 20, 30, 40, 50];
         drawChart = drawDonnutChart;
         break;
-      case "gant":
-        data = [10, 20, 30, 40, 50];
-        drawChart = drawGantChart;
-        break;
-      // Adicione outros casos conforme necessário para outros tipos de gráficos
       default:
-        // Se lastDroppedItem não corresponder a nenhum caso, retorna null
         return null;
     }
   
-    // Cria o SVG e desenha o gráfico usando a função apropriada
     const svg = d3.create('svg')
       .attr('width', 200)
       .attr('height', 250)
@@ -102,7 +90,6 @@ export const Dustbin = memo(function Dustbin({
     return svg.node().outerHTML;
   };
   
-  // Função para desenhar um gráfico de linha
   const drawLineChart = (svg, data) => {
     const line = d3.line()
       .x((d, i) => i * 40)
@@ -116,7 +103,6 @@ export const Dustbin = memo(function Dustbin({
       .attr("d", line);
   };
   
-  // Função para desenhar um gráfico de barras
   const drawBarChart = (svg, data) => {
     const bars = svg.selectAll('rect')
       .data(data)
@@ -140,7 +126,7 @@ export const Dustbin = memo(function Dustbin({
        .append("path")
        .attr("d", arc)
        .attr("fill", (d, i) => color(i))
-       .attr("transform", "translate(100, 120)"); // Posiciona o gráfico no centro do SVG
+       .attr("transform", "translate(100, 120)");
   };
   
   const drawBolhaChart = (svg, data) => {
@@ -166,22 +152,7 @@ export const Dustbin = memo(function Dustbin({
        .append("path")
        .attr("d", arc)
        .attr("fill", (d, i) => color(i))
-       .attr("transform", "translate(100, 120)"); // Posiciona o gráfico no centro do SVG
-  };
-  
-  const drawGantChart = (svg, data) => {
-    const timeScale = d3.scaleTime()
-                        .domain([new Date(2024, 4, 1), new Date(2024, 4, 31)])
-                        .range([0, 400]);
-    svg.selectAll("rect")
-       .data(data)
-       .enter()
-       .append("rect")
-       .attr("x", (d, i) => timeScale(new Date(2024, 4, d)))
-       .attr("y", 50)
-       .attr("width", 20)
-       .attr("height", 200)
-       .attr("fill", "steelblue");
+       .attr("transform", "translate(100, 120)");
   };
 
   return (

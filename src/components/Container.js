@@ -2,11 +2,8 @@ import update from 'immutability-helper';
 import { memo, useCallback, useState } from 'react';
 import { Dustbin } from './dustbin.js';
 import { Box } from './Box.js';
-import { ItemTypes } from './ItemTypes.js';
-import axios from 'axios';
-import * as d3 from 'd3';
 import ReactDatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css'; // Importe os estilos do ReactDatePicker
+import 'react-datepicker/dist/react-datepicker.css';
 
 export const Container = memo(function Container() {
   const [dustbins, setDustbins] = useState([
