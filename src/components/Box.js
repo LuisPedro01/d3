@@ -10,11 +10,11 @@ const style = {
   float: 'left',
 };
 
-export const Box = memo(function Box({ name, startDate, endDate, selectedOption, type, isDropped }) {
+export const Box = memo(function Box({ name, startDate, endDate, selectedOption, selectedGraph, type, isDropped }) {
   const [{ opacity }, drag] = useDrag(
     () => ({
       type,
-      item: { name, startDate, endDate, selectedOption },
+      item: { name, startDate, endDate, selectedOption, selectedGraph },
       collect: (monitor) => ({
         opacity: monitor.isDragging() ? 0.4 : 1,
       }),

@@ -15,16 +15,15 @@ export const Container = memo(function Container() {
     { accepts: ['TODOS'], lastDroppedItem: null },
     { accepts: ['TODOS'], lastDroppedItem: null },
     { accepts: ['TODOS'], lastDroppedItem: null },
-    { accepts: ['TODOS'], lastDroppedItem: null },
-    { accepts: ['TODOS'], lastDroppedItem: null },
-    { accepts: ['TODOS'], lastDroppedItem: null },
   ]);
   const [boxes, setBoxes] = useState([]);
   const [droppedBoxNames, setDroppedBoxNames] = useState([]);
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(new Date("11-30-2020"));
+  const [endDate, setEndDate] = useState(new Date("11-30-2020"));
   const [name, setName] = useState('')
   const [selectedOption, setSelectedOption] = useState('capsules');
+  const [selectedGraph, setSelectedGraph] = useState('barras');
+
 
   function isDropped(boxName) {
     return droppedBoxNames.indexOf(boxName) > -1;
@@ -34,11 +33,15 @@ export const Container = memo(function Container() {
     setSelectedOption(event.target.value);
   };
 
+  const handleSelectChart = (event) => {
+    setSelectedGraph(event.target.value);
+  };
+
   const handleDrop = useCallback(
     async (index, item) => {
-      const { name, startDate, endDate, selectedOption } = item;
+      const { name, startDate, endDate, selectedOption, selectedGraph } = item;
       setDroppedBoxNames((prevNames) =>
-        update(prevNames, name ? { $push: [name, startDate, endDate, selectedOption] } : { $push: [] })
+        update(prevNames, name ? { $push: [name, startDate, endDate, selectedOption, selectedGraph] } : { $push: [] })
 
       );
       setDustbins((prevDustbins) =>
@@ -55,11 +58,6 @@ export const Container = memo(function Container() {
   );
 
   const addNewGraph = () => {
-    console.log(name)
-    console.log(selectedOption)
-    console.log(startDate)
-    console.log(endDate)
-
     if(!hasErrors()){
       setBoxes((prevBoxes) =>
         update(prevBoxes, {
@@ -75,6 +73,14 @@ export const Container = memo(function Container() {
       return true
     }
   }
+
+  const handleAddDustbin = () => {
+    setDustbins((prevDustbins) =>
+      update(prevDustbins, {
+        $push: [{ accepts: ['TODOS'], lastDroppedItem: null }],
+      })
+    );
+  };
 
   return (
     <div style={{ display: "flex", width: "100%", height: "100%" }}>
@@ -102,6 +108,7 @@ export const Container = memo(function Container() {
             onChange={(date) => setStartDate(date)}
             dateFormat="dd/MM/yyyy"
             className='datePicker'
+            maxDate={new Date("11-30-2020")}
           />
           <span>Data Fim</span>
           <ReactDatePicker
@@ -109,14 +116,15 @@ export const Container = memo(function Container() {
             onChange={(date) => setEndDate(date)}
             dateFormat="dd/MM/yyyy"
             className='datePicker'
+            maxDate={new Date("11-30-2020")}
           />
         </div>
 
-        {/* Filtro tipo de Gráfico */}
+        {/* Filtro tipo de Variável */}
         <div
           style={{ display: "flex", marginTop: "20px", marginBottom: "20px", alignItems: 'center' }}
         >
-          <span>Variável</span>
+          <span>Routes</span>
           <select 
             style={{width: '150px', height: '30px', borderRadius: '5px', marginLeft: '20px', border: '2px solid #9dadb3'}}
             value={selectedOption}
@@ -138,6 +146,26 @@ export const Container = memo(function Container() {
           </select>
         </div>
 
+
+        {/* Filtro tipo de Gráfico */}
+        <div
+          style={{ display: "flex", marginTop: "20px", marginBottom: "20px", alignItems: 'center' }}
+        >
+          <span>Tipo de Gráfico</span>
+          <select
+            style={{ width: '150px', height: '30px', borderRadius: '5px', marginLeft: '20px', border: '2px solid #9dadb3' }}
+            value={selectedGraph}
+            onChange={handleSelectChart}
+          >
+            <option value="barras">Barras</option>
+            <option value="linhas">Linhas</option>
+            <option value="pizza">Pizza</option>
+            <option value="bolhas">Bolhas</option>
+            <option value="donnut">Donnut</option>
+            <option value="gantt">Gantt</option>
+          </select>
+        </div>
+
         {/* Criar Gráfico */}
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <div style={{ marginBottom: "10px", cursor: "pointer", border: '2px solid #1ebffa', borderRadius: '5px', backgroundColor: '#2abff5', padding: '5px', width: '70%', justifyItems: 'center' }}>
@@ -154,6 +182,7 @@ export const Container = memo(function Container() {
               startDate={startDate}
               endDate={endDate}
               selectedOption={selectedOption}
+              selectedGraph={selectedGraph}
               type={type}
               isDropped={isDropped(name)}
               key={index}
@@ -177,6 +206,30 @@ export const Container = memo(function Container() {
             key={index}
           />
         ))}
+
+        {/* Dustbin especial com '+' */}
+        <div
+          style={{
+              height: '280px',
+              width: '280px',
+              margin: '20px',
+              color: 'white',
+              padding: '10px',
+              textAlign: 'center',
+              fontSize: '12px',
+              lineHeight: 'normal',
+              float: 'left',
+              borderRadius: '10px',
+              backgroundColor: '#aeafb0',
+              cursor: 'pointer',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'   
+          }}
+          onClick={handleAddDustbin}
+        >
+          <span style={{ color: '#fff', fontSize: '100px' }}>+</span>
+        </div>
       </div>
     </div>
   );
