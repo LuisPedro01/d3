@@ -36,9 +36,10 @@ export const Container = memo(function Container() {
 
   const handleDrop = useCallback(
     async (index, item) => {
-      const { name } = item;
+      const { name, startDate, endDate, selectedOption } = item;
       setDroppedBoxNames((prevNames) =>
-        update(prevNames, name ? { $push: [name] } : { $push: [] })
+        update(prevNames, name ? { $push: [name, startDate, endDate, selectedOption] } : { $push: [] })
+
       );
       setDustbins((prevDustbins) =>
         update(prevDustbins, {
@@ -150,6 +151,9 @@ export const Container = memo(function Container() {
           boxes.map(({ name, type }, index) => (
             <Box
               name={name}
+              startDate={startDate}
+              endDate={endDate}
+              selectedOption={selectedOption}
               type={type}
               isDropped={isDropped(name)}
               key={index}
