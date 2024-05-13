@@ -85,8 +85,8 @@ export const Dustbin = memo(function Dustbin({
       style={{ ...style, backgroundColor }}
       data-testid="dustbin"
     >
-      {isActive ? 'Release to drop' : `Gráfico 1: ${accept.join(', ')}`}
-      {lastDroppedItem && <p>Last dropped: {JSON.stringify(lastDroppedItem)}</p>}
+      {isActive ? 'Release to drop' : `Nome : ${lastDroppedItem?.name}`}
+      {lastDroppedItem && <p>Variável: {lastDroppedItem.selectedOption}</p>}
       {lastDroppedItem && (
         <div dangerouslySetInnerHTML={{ __html: createBarChart() }} />
       )}
