@@ -34,6 +34,16 @@ export const Container = memo(function Container() {
     setSelectedGraph(event.target.value);
   };
 
+  const onDelete = (boxName) => {
+    setBoxes((prevBoxes) =>
+      prevBoxes.filter((box) => box.name !== boxName)
+    );
+    setDroppedBoxNames((prevNames) =>
+      prevNames.filter((name) => name !== boxName)
+    );
+  };
+  
+
   const handleDrop = useCallback(
     async (index, item) => {
       const { name, startDate, endDate, selectedOption, selectedGraph } = item;
@@ -180,6 +190,7 @@ export const Container = memo(function Container() {
               endDate={endDate}
               selectedOption={selectedOption}
               selectedGraph={selectedGraph}
+              onDelete={onDelete}
               type={type}
               isDropped={isDropped(name)}
               key={index}

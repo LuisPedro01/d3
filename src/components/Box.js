@@ -1,5 +1,6 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useDrag } from 'react-dnd';
+import { AiTwotoneDelete } from "react-icons/ai";
 
 const style = {
   border: '1px dashed gray',
@@ -11,7 +12,7 @@ const style = {
   borderRadius: '10px'
 };
 
-export const Box = memo(function Box({ name, startDate, endDate, selectedOption, selectedGraph, type, isDropped }) {
+export const Box = memo(function Box({ name, startDate, endDate, selectedOption, selectedGraph, type, isDropped, onDelete }) {
   const [{ opacity }, drag] = useDrag(
     () => ({
       type,
@@ -22,10 +23,27 @@ export const Box = memo(function Box({ name, startDate, endDate, selectedOption,
     }),
     [name, type]
   );
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleDelete = () => {
+    onDelete(name);
+  };
 
   return (
-    <div ref={drag} style={{ ...style, opacity }} data-testid="box">
+    <div
+      ref={drag}
+      style={{ ...style, opacity }}
+      data-testid="box"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {isDropped ? <s>{name}</s> : name}
+
+      <div style={{float: 'right', cursor: 'pointer', marginLeft: '-20px', marginBottom: '-1px'}} onClick={handleDelete}>
+        {isHovered && (
+          <AiTwotoneDelete />
+        )}
+      </div>
     </div>
   );
 });
