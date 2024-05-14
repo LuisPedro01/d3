@@ -42,7 +42,12 @@ export const Container = memo(function Container() {
       prevNames.filter((name) => name !== boxName)
     );
   };
-  
+
+  const onDelete2 = (index) => {
+    setDustbins((prevDustbins) =>
+      prevDustbins.filter((_, i) => i !== index)
+    );
+  };
 
   const handleDrop = useCallback(
     async (index, item) => {
@@ -70,8 +75,9 @@ export const Container = memo(function Container() {
         update(prevBoxes, {
           $push: [{ name: name, type:'TODOS', selectedOption: selectedOption, startDate: startDate, endDate: endDate}],
         })
-      );
-    }
+        );
+        setName('');
+      }
   };
 
   const hasErrors = () => {
@@ -103,7 +109,7 @@ export const Container = memo(function Container() {
         {/* Nome Gráfico */}
         <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: '15px' }}>
           <span>Nome do Gráfico</span>
-          <input type={'text'} style={{height: '20px', border: '2px solid #9dadb3', borderRadius: '5px', padding:'5px'}} onChange={(event) => setName(event.target.value)} placeholder={'Insira aqui o nome do gráfico'}></input>
+          <input type={'text'} value={name} style={{height: '20px', border: '2px solid #9dadb3', borderRadius: '5px', padding:'5px'}} onChange={(event) => setName(event.target.value)} placeholder={'Insira aqui o nome do gráfico'}></input>
         </div>
 
 
@@ -207,12 +213,16 @@ export const Container = memo(function Container() {
           <span>Lista de Gráficos</span>
         </div>
         {dustbins.map(({ accepts, lastDroppedItem }, index) => (
+          <>
+          {console.log(index)}
           <Dustbin
             accept={accepts}
             lastDroppedItem={lastDroppedItem}
             onDrop={(item) => handleDrop(index, item)}
-            key={index}
+            index={index}
+            onDelete={onDelete2}
           />
+          </>
         ))}
 
         {/* Dustbin especial com '+' */}

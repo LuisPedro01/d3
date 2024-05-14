@@ -2,6 +2,7 @@ import React, { memo, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import * as d3 from 'd3';
 import axios from 'axios';
+import { AiTwotoneDelete } from "react-icons/ai";
 
 const style = {
   height: '280px',
@@ -21,6 +22,8 @@ export const Dustbin = memo(function Dustbin({
   accept,
   lastDroppedItem,
   onDrop,
+  onDelete,
+  index
 }) {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept,
@@ -30,6 +33,11 @@ export const Dustbin = memo(function Dustbin({
       canDrop: monitor.canDrop(),
     }),
   });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleDelete = () => {
+    onDelete(index);
+  };
 
   const isActive = isOver && canDrop;
   let backgroundColor = '#fff';
@@ -38,7 +46,6 @@ export const Dustbin = memo(function Dustbin({
   } else if (canDrop) {
     backgroundColor = '#f0f0f0';
   }
-
 
   async function fetchData() {
     try {
@@ -161,7 +168,17 @@ export const Dustbin = memo(function Dustbin({
       ref={drop}
       style={{ ...style, backgroundColor, filter: backgroundColor === '#f0f0f0' ? 'blur(0.5px)' : '' }}
       data-testid="dustbin"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      {isHovered && (
+        <div style={{ float: 'right', cursor: 'pointer', marginLeft: '-20px', marginBottom: '-1px' }} onClick={handleDelete}>
+          {index >= 5 && (
+            <AiTwotoneDelete style={{ width: '15px', height: '15px' }} />
+          )}
+        </div>
+
+      )}
       {isActive ? 'Release to drop' : `Nome : ${lastDroppedItem?.name}`}
       {lastDroppedItem && <p>Variável: {lastDroppedItem.selectedOption}</p>}
       {lastDroppedItem && (
