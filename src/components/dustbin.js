@@ -64,7 +64,7 @@ export const Dustbin = memo(function Dustbin({
     let drawChart;  
     switch (lastDroppedItem) {
       case "linhas":
-        data = [10, 20, 30, 40, 50];
+        data = [0, 10, 15, 10, 25];
         drawChart = drawLineChart;
         break;
       case "barras":
@@ -98,57 +98,60 @@ export const Dustbin = memo(function Dustbin({
     return svg.node().outerHTML;
   };
   
-  const drawLineChart = (svg, data) => {
-    const margin = { top: 20, right: 0, bottom: 30, left: 50 };
-    const width = 200 - margin.left - margin.right;
-    const height = 250 - margin.top - margin.bottom;
-  
-    const x = d3.scaleLinear()
-      .domain([0, data.length - 1])
-      .range([0, width]);
-  
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(data)])
-      .nice()
-      .range([height, 0]);
-  
-    const xAxis = d3.axisBottom(x);
-    const yAxis = d3.axisLeft(y);
-  
-    svg.append("g")
-      .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
-      .call(xAxis);
-  
-    svg.append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-      .call(yAxis);
-  
-    const line = d3.line()
-      .x((d, i) => x(i))
-      .y(d => y(d));
-  
-    svg.append("path")
-      .datum(data)
-      .attr("fill", "none")
-      .attr("stroke", "steelblue")
-      .attr("stroke-width", 2)
-      .attr("d", line);
-  
-      svg.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", margin.left / 2)
-      .attr("x", 0 - (height / 2))
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .text("Eixo Y");
-  
-    svg.append("text")
-      .attr("y", height + margin.top + (margin.bottom / 2))
-      .attr("x", width / 2)
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .text("Eixo X");
-  };
+const drawLineChart = (svg, data) => {
+  const margin = { top: 20, right: 0, bottom: 30, left: 35 };
+  const width = 200 - margin.left - margin.right;
+  const height = 250 - margin.top - margin.bottom;
+
+  // Definindo os domínios dos escaladores
+  const x = d3.scaleLinear()
+    .domain([0, data.length - 1]) // Vai de 0 ao tamanho do array - 1
+    .range([0, width]);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data)]) // Vai de 0 ao máximo valor dos dados
+    .nice()
+    .range([height, 0]);
+
+  const xAxis = d3.axisBottom(x);
+  const yAxis = d3.axisLeft(y);
+
+  svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
+    .call(xAxis);
+
+  svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .call(yAxis);
+
+  const line = d3.line()
+    .x((d, i) => x(i +0.9)) // Usa o índice como valor do eixo X
+    .y(d => y(d - 2.5)); // Usa o valor do dado para o eixo Y
+
+  svg.append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 2)
+    .attr("d", line);
+
+  // Adicionando rótulos dos eixos
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", margin.left / 2 - 15)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Eixo Y");
+
+  svg.append("text")
+    .attr("y", height + margin.top + (margin.bottom / 2))
+    .attr("x", width / 2 + 50)
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Eixo X");
+};
+
   
   const drawBarChart = (svg, data) => {
     const margin = { top: 20, right: 0, bottom: 30, left: 35 };
