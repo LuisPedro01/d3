@@ -47,9 +47,9 @@ export const Dustbin = memo(function Dustbin({
     backgroundColor = '#f0f0f0';
   }
 
-  async function fetchData() {
+  async function fetchData(variavel) {
     try {
-      const response = await axios.get('https://api.spacexdata.com/v4/launches');
+      const response = await axios.get(`https://api.spacexdata.com/v4/${variavel}`);
       const allLaunches = response.data;
       const latestLaunches = allLaunches.slice(-20);
       return latestLaunches;
@@ -58,7 +58,6 @@ export const Dustbin = memo(function Dustbin({
       return [];
     }
   }
-  
 
   const createChart = (lastDroppedItem) => {
     let data;
@@ -99,9 +98,33 @@ export const Dustbin = memo(function Dustbin({
   };
   
   const drawLineChart = (svg, data) => {
+    const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+    const width = 200 - margin.left - margin.right;
+    const height = 250 - margin.top - margin.bottom;
+  
+    const x = d3.scaleLinear()
+      .domain([0, data.length - 1])
+      .range([0, width]);
+  
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data)])
+      .nice()
+      .range([height, 0]);
+  
+    const xAxis = d3.axisBottom(x);
+    const yAxis = d3.axisLeft(y);
+  
+    svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
+      .call(xAxis);
+  
+    svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+      .call(yAxis);
+  
     const line = d3.line()
-      .x((d, i) => i * 40)
-      .y(d => 250 - d * 4);
+      .x((d, i) => x(i))
+      .y(d => y(d));
   
     svg.append("path")
       .datum(data)
@@ -109,19 +132,75 @@ export const Dustbin = memo(function Dustbin({
       .attr("stroke", "steelblue")
       .attr("stroke-width", 2)
       .attr("d", line);
+  
+      svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", margin.left / 2)
+      .attr("x", 0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Eixo Y");
+  
+    svg.append("text")
+      .attr("y", height + margin.top + (margin.bottom / 2))
+      .attr("x", width / 2)
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Eixo X");
   };
   
+  
   const drawBarChart = (svg, data) => {
-    const bars = svg.selectAll('rect')
+    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+    const width = 200 - margin.left - margin.right;
+    const height = 250 - margin.top - margin.bottom;
+  
+    const x = d3.scaleBand()
+      .domain(data.map((_, i) => i))
+      .range([0, width])
+      .padding(0.1);
+  
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data)])
+      .nice()
+      .range([height, 0]);
+  
+    const xAxis = d3.axisBottom(x);
+    const yAxis = d3.axisLeft(y);
+  
+    svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
+      .call(xAxis);
+  
+    svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+      .call(yAxis);
+  
+    svg.selectAll("rect")
       .data(data)
-      .enter()
-      .append('rect')
-      .attr('x', (d, i) => i * 40)
-      .attr('y', (d) => 250 - d * 4)
-      .attr('width', 35)
-      .attr('height', (d) => d * 4)
-      .attr('fill', 'steelblue');
+      .enter().append("rect")
+      .attr("x", (d, i) => margin.left + x(i))
+      .attr("y", (d) => margin.top + y(d))
+      .attr("width", x.bandwidth())
+      .attr("height", (d) => height - y(d))
+      .attr("fill", "steelblue");
+  
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", margin.left / 2)
+      .attr("x", 0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Eixo Y");
+  
+    svg.append("text")
+      .attr("y", height + margin.top + (margin.bottom / 2))
+      .attr("x", width / 2)
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Eixo X");
   };
+  
 
   const drawPizzaChart = (svg, data) => {
     const pie = d3.pie();
