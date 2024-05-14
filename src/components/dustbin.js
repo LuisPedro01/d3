@@ -88,9 +88,10 @@ export const Dustbin = memo(function Dustbin({
     }
   
     const svg = d3.create('svg')
-      .attr('width', 200)
+      .attr('width', 280)
       .attr('height', 250)
-      .style('margin-top', -30);
+      .style('margin-top', -20)
+      .style('margin-left', 10);
   
     drawChart(svg, data);
   
@@ -98,7 +99,7 @@ export const Dustbin = memo(function Dustbin({
   };
   
   const drawLineChart = (svg, data) => {
-    const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+    const margin = { top: 20, right: 0, bottom: 30, left: 50 };
     const width = 200 - margin.left - margin.right;
     const height = 250 - margin.top - margin.bottom;
   
@@ -149,9 +150,8 @@ export const Dustbin = memo(function Dustbin({
       .text("Eixo X");
   };
   
-  
   const drawBarChart = (svg, data) => {
-    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+    const margin = { top: 20, right: 0, bottom: 30, left: 35 };
     const width = 200 - margin.left - margin.right;
     const height = 250 - margin.top - margin.bottom;
   
@@ -187,7 +187,7 @@ export const Dustbin = memo(function Dustbin({
   
     svg.append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", margin.left / 2)
+      .attr("y", margin.left / 2 - 15)
       .attr("x", 0 - (height / 2))
       .attr("dy", "1em")
       .style("text-anchor", "middle")
@@ -195,7 +195,7 @@ export const Dustbin = memo(function Dustbin({
   
     svg.append("text")
       .attr("y", height + margin.top + (margin.bottom / 2))
-      .attr("x", width / 2)
+      .attr("x", width / 2 + 50)
       .attr("dy", "1em")
       .style("text-anchor", "middle")
       .text("Eixo X");
