@@ -8,6 +8,7 @@ const style = {
   marginBottom: '1.5rem',
   cursor: 'move',
   float: 'left',
+  borderRadius: '10px'
 };
 
 export const Box = memo(function Box({ name, startDate, endDate, selectedOption, selectedGraph, type, isDropped }) {

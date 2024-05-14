@@ -7,13 +7,14 @@ const style = {
   height: '280px',
   width: '280px',
   margin: '20px',
-  color: 'white',
+  color: '#000000',
   padding: '10px',
   textAlign: 'center',
   fontSize: '12px',
   lineHeight: 'normal',
   float: 'left',
-  borderRadius: '10px'
+  borderRadius: '10px',
+  border: '2px solid #000000',
 };
 
 export const Dustbin = memo(function Dustbin({
@@ -31,11 +32,11 @@ export const Dustbin = memo(function Dustbin({
   });
 
   const isActive = isOver && canDrop;
-  let backgroundColor = '#aeafb0';
+  let backgroundColor = '#fff';
   if (isActive) {
-    backgroundColor = 'darkgreen';
+    backgroundColor = '#a9e6fc';
   } else if (canDrop) {
-    backgroundColor = 'darkkhaki';
+    backgroundColor = '#f0f0f0';
   }
 
 
@@ -158,7 +159,7 @@ export const Dustbin = memo(function Dustbin({
   return (
     <div
       ref={drop}
-      style={{ ...style, backgroundColor }}
+      style={{ ...style, backgroundColor, filter: backgroundColor === '#f0f0f0' ? 'blur(0.5px)' : '' }}
       data-testid="dustbin"
     >
       {isActive ? 'Release to drop' : `Nome : ${lastDroppedItem?.name}`}

@@ -217,7 +217,8 @@ export const Container = memo(function Container() {
               lineHeight: 'normal',
               float: 'left',
               borderRadius: '10px',
-              backgroundColor: '#aeafb0',
+              border: '2px solid #000000',
+              // backgroundColor: '#aeafb0',
               cursor: 'pointer',
               display: 'flex',
               justifyContent: 'center',
@@ -225,7 +226,7 @@ export const Container = memo(function Container() {
           }}
           onClick={handleAddDustbin}
         >
-          <span style={{ color: '#fff', fontSize: '100px' }}>+</span>
+          <span style={{ color: '#aeafb0', fontSize: '100px' }}>+</span>
         </div>
       </div>
     </div>
