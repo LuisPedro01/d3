@@ -212,7 +212,6 @@ export const Dustbin = memo(function Dustbin({
       .append("path")
       .attr("d", arc)
       .attr("fill", (d, i) => color(i))
-      .attr("transform", "translate(100, 120)")
       .attr("transform", `translate(130, 120)`);
 
   };
@@ -273,7 +272,7 @@ export const Dustbin = memo(function Dustbin({
        .append("path")
        .attr("d", arc)
        .attr("fill", (d, i) => color(i))
-       .attr("transform", "translate(100, 120)");
+       .attr("transform", "translate(130, 120)");
   };
 
   return (
