@@ -61,7 +61,7 @@ export const Dustbin = memo(function Dustbin({
 
   const createChart = (lastDroppedItem) => {
     let data;
-    let drawChart;  
+    let drawChart;
     switch (lastDroppedItem) {
       case "linhas":
         data = [0, 10, 15, 10, 25];
@@ -86,18 +86,18 @@ export const Dustbin = memo(function Dustbin({
       default:
         return null;
     }
-  
+
     const svg = d3.create('svg')
       .attr('width', 280)
       .attr('height', 250)
       .style('margin-top', -20)
       .style('margin-left', 10);
-  
+
     drawChart(svg, data);
-  
+
     return svg.node().outerHTML;
   };
-  
+
   const drawLineChart = (svg, data) => {
     const margin = { top: 20, right: 0, bottom: 30, left: 35 };
     const width = 200 - margin.left - margin.right;
@@ -124,7 +124,7 @@ export const Dustbin = memo(function Dustbin({
       .call(yAxis);
 
     const line = d3.line()
-      .x((d, i) => x(i +0.9))
+      .x((d, i) => x(i + 0.9))
       .y(d => y(d - 2.5));
 
     svg.append("path")
@@ -154,28 +154,28 @@ export const Dustbin = memo(function Dustbin({
     const margin = { top: 20, right: 0, bottom: 30, left: 35 };
     const width = 200 - margin.left - margin.right;
     const height = 250 - margin.top - margin.bottom;
-  
+
     const x = d3.scaleBand()
       .domain(data.map((_, i) => i))
       .range([0, width])
       .padding(0.1);
-  
+
     const y = d3.scaleLinear()
       .domain([0, d3.max(data)])
       .nice()
       .range([height, 0]);
-  
+
     const xAxis = d3.axisBottom(x);
     const yAxis = d3.axisLeft(y);
-  
+
     svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
       .call(xAxis);
-  
+
     svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
       .call(yAxis);
-  
+
     svg.selectAll("rect")
       .data(data)
       .enter().append("rect")
@@ -184,7 +184,7 @@ export const Dustbin = memo(function Dustbin({
       .attr("width", x.bandwidth())
       .attr("height", (d) => height - y(d))
       .attr("fill", "steelblue");
-  
+
     svg.append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", margin.left / 2 - 15)
@@ -192,7 +192,7 @@ export const Dustbin = memo(function Dustbin({
       .attr("dy", "1em")
       .style("text-anchor", "middle")
       .text("Eixo Y");
-  
+
     svg.append("text")
       .attr("y", height + margin.top + (margin.bottom / 2))
       .attr("x", width / 2 + 50)
@@ -200,7 +200,7 @@ export const Dustbin = memo(function Dustbin({
       .style("text-anchor", "middle")
       .text("Eixo X");
   };
-  
+
   const drawPizzaChart = (svg, data) => {
     const pie = d3.pie();
     const arc = d3.arc().innerRadius(0).outerRadius(100);
@@ -214,66 +214,117 @@ export const Dustbin = memo(function Dustbin({
       .attr("fill", (d, i) => color(i))
       .attr("transform", `translate(130, 120)`);
 
+    // Adiciona a legenda
+    const legend = svg.append("g")
+      .attr("transform", "translate(0, 20)")
+      .attr("transform", "scale(0.8)")
+      .selectAll(".legend")
+      .data(data)
+      .enter()
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+
+    // Adiciona quadrados coloridos à legenda
+    legend.append("rect")
+      .attr("x", 0)
+      .attr("width", 10)
+      .attr("height", 10)
+      .attr("fill", (d, i) => color(i));
+
+    // Adiciona texto à legenda
+    legend.append("text")
+      .attr("x", 15)
+      .attr("y", 5)
+      .attr("dy", ".35em")
+      .text((d, i) => `Category ${i + 1}`);
   };
-  
+
   const drawBolhaChart = (svg, data) => {
-    const margin = { top:10, right: 20, bottom: 50, left: 50 };
+    const margin = { top: 10, right: 20, bottom: 50, left: 50 };
     const width = +svg.attr("width") - margin.left - margin.right;
     const height = +svg.attr("height") - margin.top - margin.bottom;
-  
+
     const xScale = d3.scaleLinear()
-                    .domain([0, data.length])
-                    .range([0, width]);
+      .domain([0, data.length])
+      .range([0, width]);
     const yScale = d3.scaleLinear()
-                    .domain([0, d3.max(data)]) 
-                    .range([height, 0]);
-  
+      .domain([0, d3.max(data)])
+      .range([height, 0]);
+
     svg.selectAll("circle")
-       .data(data)
-       .enter()
-       .append("circle")
-       .attr("cx", (d, i) => xScale(i) + 50)
-       .attr("cy", d => yScale(d) + 20)
-       .attr("r", d => d)
-       .attr("fill", "steelblue")
-  
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", (d, i) => xScale(i) + 50)
+      .attr("cy", d => yScale(d) + 20)
+      .attr("r", d => d)
+      .attr("fill", "steelblue")
+
     svg.append("g")
-       .attr("transform", `translate(${margin.left}, ${height + margin.top})`)
-       .call(d3.axisBottom(xScale));
-  
+      .attr("transform", `translate(${margin.left}, ${height + margin.top})`)
+      .call(d3.axisBottom(xScale));
+
     svg.append("text")
-       .attr("transform", `translate(${width / 2}, ${height + margin.top + 40})`)
-       .style("text-anchor", "middle")
-       .text("X Axis");
-  
+      .attr("transform", `translate(${width / 2}, ${height + margin.top + 40})`)
+      .style("text-anchor", "middle")
+      .text("X Axis");
+
     svg.append("g")
-       .attr("transform", `translate(${margin.left}, ${margin.top})`)
-       .call(d3.axisLeft(yScale));
-  
+      .attr("transform", `translate(${margin.left}, ${margin.top})`)
+      .call(d3.axisLeft(yScale));
+
     svg.append("text")
-       .attr("transform", "rotate(-90)")
-       .attr("y", margin.left / 2 - 20)
-       .attr("x", 0 - (height / 2))
-       .attr("dy", "1em")
-       .style("text-anchor", "middle")
-       .text("Y Axis");
+      .attr("transform", "rotate(-90)")
+      .attr("y", margin.left / 2 - 20)
+      .attr("x", 0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Y Axis");
   };
-  
-  
+
   const drawDonnutChart = (svg, data) => {
     const donnutData = d3.pie()(data);
     const arc = d3.arc()
-                  .innerRadius(50)
-                  .outerRadius(100);
+      .innerRadius(50)
+      .outerRadius(100);
     const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    // Adiciona os arcos ao gráfico
     svg.selectAll("path")
-       .data(donnutData)
-       .enter()
-       .append("path")
-       .attr("d", arc)
-       .attr("fill", (d, i) => color(i))
-       .attr("transform", "translate(130, 120)");
+      .data(donnutData)
+      .enter()
+      .append("path")
+      .attr("d", arc)
+      .attr("fill", (d, i) => color(i))
+      .attr("transform", "translate(130, 120)");
+
+    // Adiciona a legenda
+    const legend = svg.append("g")
+      .attr("transform", "translate(0, 20)")
+      .attr("transform", "scale(0.8)")
+      .selectAll(".legend")
+      .data(data)
+      .enter()
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+
+    // Adiciona quadrados coloridos à legenda
+    legend.append("rect")
+      .attr("x", 0)
+      .attr("width", 10)
+      .attr("height", 10)
+      .attr("fill", (d, i) => color(i));
+
+    // Adiciona texto à legenda
+    legend.append("text")
+      .attr("x", 15)
+      .attr("y", 5)
+      .attr("dy", ".35em")
+      .text((d, i) => `Category ${i + 1}`);
   };
+
 
   return (
     <div
