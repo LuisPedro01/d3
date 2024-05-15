@@ -76,7 +76,7 @@ export const Dustbin = memo(function Dustbin({
         drawChart = drawPizzaChart;
         break;
       case "bolhas":
-        data = [10, 20, 30, 40, 50];
+        data = [0, 10, 20, 5, 20];
         drawChart = drawBolhaChart;
         break;
       case "donnut":
@@ -218,15 +218,48 @@ export const Dustbin = memo(function Dustbin({
   };
   
   const drawBolhaChart = (svg, data) => {
+    const margin = { top:10, right: 20, bottom: 50, left: 50 };
+    const width = +svg.attr("width") - margin.left - margin.right;
+    const height = +svg.attr("height") - margin.top - margin.bottom;
+  
+    const xScale = d3.scaleLinear()
+                    .domain([0, data.length])
+                    .range([0, width]);
+    const yScale = d3.scaleLinear()
+                    .domain([0, d3.max(data)]) 
+                    .range([height, 0]);
+  
     svg.selectAll("circle")
        .data(data)
        .enter()
        .append("circle")
-       .attr("cx", (d, i) => i * 40)
-       .attr("cy", d => 250 - d * 4)
+       .attr("cx", (d, i) => xScale(i) + 50)
+       .attr("cy", d => yScale(d) + 20)
        .attr("r", d => d)
-       .attr("fill", "steelblue");
+       .attr("fill", "steelblue")
+  
+    svg.append("g")
+       .attr("transform", `translate(${margin.left}, ${height + margin.top})`)
+       .call(d3.axisBottom(xScale));
+  
+    svg.append("text")
+       .attr("transform", `translate(${width / 2}, ${height + margin.top + 40})`)
+       .style("text-anchor", "middle")
+       .text("X Axis");
+  
+    svg.append("g")
+       .attr("transform", `translate(${margin.left}, ${margin.top})`)
+       .call(d3.axisLeft(yScale));
+  
+    svg.append("text")
+       .attr("transform", "rotate(-90)")
+       .attr("y", margin.left / 2 - 20)
+       .attr("x", 0 - (height / 2))
+       .attr("dy", "1em")
+       .style("text-anchor", "middle")
+       .text("Y Axis");
   };
+  
   
   const drawDonnutChart = (svg, data) => {
     const donnutData = d3.pie()(data);
