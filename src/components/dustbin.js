@@ -105,11 +105,11 @@ export const Dustbin = memo(function Dustbin({
         drawChart = drawLineChart;
         break;
       case "barras":
-        data = [10, 20, 30, 40, 50];
+        // data = [10, 20, 30, 40, 50];
         drawChart = drawBarChart;
         break;
       case "pizza":
-        data = [10, 20, 30, 40, 50];
+        // data = [10, 20, 30, 40, 50];
         drawChart = drawPizzaChart;
         break;
       case "bolhas":
@@ -228,25 +228,24 @@ export const Dustbin = memo(function Dustbin({
       .attr("fill", "steelblue");
   };
   
-  const drawPizzaChart = (svg, data) => {
+  const drawPizzaChart = (svg, rocketNames, rocketCounts) => {
     const pie = d3.pie();
     const arc = d3.arc().innerRadius(0).outerRadius(100);
     const color = d3.scaleOrdinal(d3.schemeCategory10);
-    const pieData = pie(data);
+    const pieData = pie(rocketCounts);
     svg.selectAll("path")
       .data(pieData)
       .enter()
       .append("path")
       .attr("d", arc)
       .attr("fill", (d, i) => color(i))
-      .attr("transform", `translate(130, 120)`);
+      .attr("transform", `translate(130, 135)`);
 
     // Adiciona a legenda
     const legend = svg.append("g")
-      .attr("transform", "translate(0, 20)")
-      .attr("transform", "scale(0.8)")
+      .attr("transform", "translate(0, 10) scale(0.8)")
       .selectAll(".legend")
-      .data(data)
+      .data(rocketNames)
       .enter()
       .append("g")
       .attr("class", "legend")
@@ -264,7 +263,7 @@ export const Dustbin = memo(function Dustbin({
       .attr("x", 15)
       .attr("y", 5)
       .attr("dy", ".35em")
-      .text((d, i) => `Category ${i + 1}`);
+      .text(rocketNames);
   };
 
   const drawBolhaChart = (svg, data) => {
@@ -376,8 +375,8 @@ export const Dustbin = memo(function Dustbin({
       {lastDroppedItem && (
         <>
         <div dangerouslySetInnerHTML={{ __html: createChart(lastDroppedItem.selectedGraph, rocketData.names, rocketData.counts) }} />
-        <div onClick={() => fetchData(lastDroppedItem)}>TESTAR API</div>
-        {numLaunches !== null && <p>Número de lançamentos entre as datas: {numLaunches}</p>}
+        {/* <div onClick={() => fetchData(lastDroppedItem)}>TESTAR API</div>
+        {numLaunches !== null && <p>Número de lançamentos entre as datas: {numLaunches}</p>} */}
         </>
       )}
     </div>
