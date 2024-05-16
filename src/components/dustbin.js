@@ -309,8 +309,8 @@ export const Dustbin = memo(function Dustbin({
       .text("Y Axis");
   };
 
-  const drawDonnutChart = (svg, data) => {
-    const donnutData = d3.pie()(data);
+  const drawDonnutChart = (svg, rocketNames, rocketCounts) => {
+    const donnutData = d3.pie()(rocketCounts);
     const arc = d3.arc()
       .innerRadius(50)
       .outerRadius(100);
@@ -323,14 +323,13 @@ export const Dustbin = memo(function Dustbin({
       .append("path")
       .attr("d", arc)
       .attr("fill", (d, i) => color(i))
-      .attr("transform", "translate(130, 120)");
+      .attr("transform", "translate(130, 135)");
 
     // Adiciona a legenda
     const legend = svg.append("g")
-      .attr("transform", "translate(0, 20)")
-      .attr("transform", "scale(0.8)")
+      .attr("transform", "translate(0, 10) scale(0.8)")
       .selectAll(".legend")
-      .data(data)
+      .data(rocketNames)
       .enter()
       .append("g")
       .attr("class", "legend")
@@ -348,7 +347,7 @@ export const Dustbin = memo(function Dustbin({
       .attr("x", 15)
       .attr("y", 5)
       .attr("dy", ".35em")
-      .text((d, i) => `Category ${i + 1}`);
+      .text(rocketNames);
   };
 
   if(lastDroppedItem){
