@@ -34,6 +34,8 @@ export const Dustbin = memo(function Dustbin({
     }),
   });
   const [isHovered, setIsHovered] = useState(false);
+  const [numLaunches, setNumLaunches] = useState(null);
+  const [rocketData, setRocketData] = useState({ names: [], counts: [] });
 
   const handleDelete = () => {
     onDelete(index);
@@ -47,19 +49,54 @@ export const Dustbin = memo(function Dustbin({
     backgroundColor = '#f0f0f0';
   }
 
-  async function fetchData(variavel) {
-    try {
-      const response = await axios.get(`https://api.spacexdata.com/v4/${variavel}`);
-      const allLaunches = response.data;
-      const latestLaunches = allLaunches.slice(-20);
-      return latestLaunches;
-    } catch (error) {
-      console.error('Erro ao buscar dados da API da SpaceX:', error);
-      return [];
-    }
-  }
+  async function fetchData(variavel, rocketNames, rocketCounts) {
+    const startDate = new Date(variavel.startDate);
+    const endDate = new Date(variavel.endDate);
 
-  const createChart = (lastDroppedItem) => {
+    const startYear = startDate?.getUTCFullYear();
+    const startMonth = (startDate?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
+    const startDay = startDate?.getUTCDate().toString().padStart(2, '0');
+    const startDateFormatted = `${startYear}-${startMonth}-${startDay}`
+
+    const endYear = endDate?.getUTCFullYear();
+    const endMonth = (endDate?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
+    const endDay = endDate?.getUTCDate().toString().padStart(2, '0');
+    const endDateFormatted = `${endYear}-${endMonth}-${endDay}`
+
+    try {
+        const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
+            params: {
+                start: startDateFormatted, // Defina a data de início
+                end: endDateFormatted    // Defina a data de término
+            }
+        });
+        const allLaunches = response.data;        
+        const rocketCounts = {};
+        
+        allLaunches.forEach(launch => {
+          const rocketName = launch.rocket.rocket_name;
+          if (rocketCounts.hasOwnProperty(rocketName)) {
+            rocketCounts[rocketName]++;
+          } else {
+            rocketCounts[rocketName] = 1;
+          }
+        });
+        
+        for (const rocketName in rocketCounts) {
+          console.log(`${rocketName}: ${rocketCounts[rocketName]}`);
+        }
+        
+        const rocketNames = Object.keys(rocketCounts);
+        const rocketCountsArray = Object.values(rocketCounts);
+        setRocketData({ names: rocketNames, counts: rocketCountsArray });
+
+        setNumLaunches(allLaunches.length);
+    } catch (error) {
+        console.error('Erro ao buscar dados da API da SpaceX:', error);
+    }
+}
+
+  const createChart = (lastDroppedItem, rocketNames, rocketCounts) => {
     let data;
     let drawChart;
     switch (lastDroppedItem) {
@@ -93,7 +130,7 @@ export const Dustbin = memo(function Dustbin({
       .style('margin-top', -20)
       .style('margin-left', 10);
 
-    drawChart(svg, data);
+    drawChart(svg, rocketNames, rocketCounts);
 
     return svg.node().outerHTML;
   };
@@ -150,57 +187,47 @@ export const Dustbin = memo(function Dustbin({
       .text("Eixo X");
   };
 
-  const drawBarChart = (svg, data) => {
+  const drawBarChart = (svg, rocketNames, rocketCounts) => {
     const margin = { top: 20, right: 0, bottom: 30, left: 35 };
     const width = 200 - margin.left - margin.right;
     const height = 250 - margin.top - margin.bottom;
-
+  
     const x = d3.scaleBand()
-      .domain(data.map((_, i) => i))
+      .domain(rocketNames)
       .range([0, width])
       .padding(0.1);
-
+  
     const y = d3.scaleLinear()
-      .domain([0, d3.max(data)])
+      .domain([0, d3.max(rocketCounts)])
       .nice()
       .range([height, 0]);
-
+  
     const xAxis = d3.axisBottom(x);
     const yAxis = d3.axisLeft(y);
-
+  
     svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
-      .call(xAxis);
-
+      .call(xAxis)
+      .selectAll("text")
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", ".15em")
+      .attr("transform", "translate(30, 5)");
+  
     svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
       .call(yAxis);
-
+  
     svg.selectAll("rect")
-      .data(data)
+      .data(rocketCounts)
       .enter().append("rect")
-      .attr("x", (d, i) => margin.left + x(i))
+      .attr("x", (d, i) => margin.left + x(rocketNames[i]))
       .attr("y", (d) => margin.top + y(d))
       .attr("width", x.bandwidth())
       .attr("height", (d) => height - y(d))
       .attr("fill", "steelblue");
-
-    svg.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", margin.left / 2 - 15)
-      .attr("x", 0 - (height / 2))
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .text("Eixo Y");
-
-    svg.append("text")
-      .attr("y", height + margin.top + (margin.bottom / 2))
-      .attr("x", width / 2 + 50)
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .text("Eixo X");
   };
-
+  
   const drawPizzaChart = (svg, data) => {
     const pie = d3.pie();
     const arc = d3.arc().innerRadius(0).outerRadius(100);
@@ -325,6 +352,9 @@ export const Dustbin = memo(function Dustbin({
       .text((d, i) => `Category ${i + 1}`);
   };
 
+  if(lastDroppedItem){
+    fetchData(lastDroppedItem)
+  }
 
   return (
     <div
@@ -340,12 +370,15 @@ export const Dustbin = memo(function Dustbin({
             <AiTwotoneDelete style={{ width: '15px', height: '15px' }} />
           )}
         </div>
-
       )}
       {isActive ? 'Release to drop' : `Nome : ${lastDroppedItem?.name}`}
       {lastDroppedItem && <p>Variável: {lastDroppedItem.selectedOption}</p>}
       {lastDroppedItem && (
-        <div dangerouslySetInnerHTML={{ __html: createChart(lastDroppedItem.selectedGraph) }} />
+        <>
+        <div dangerouslySetInnerHTML={{ __html: createChart(lastDroppedItem.selectedGraph, rocketData.names, rocketData.counts) }} />
+        <div onClick={() => fetchData(lastDroppedItem)}>TESTAR API</div>
+        {numLaunches !== null && <p>Número de lançamentos entre as datas: {numLaunches}</p>}
+        </>
       )}
     </div>
   );

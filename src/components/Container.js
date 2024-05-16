@@ -143,7 +143,7 @@ export const Container = memo(function Container() {
             value={selectedOption}
             onChange={handleSelectChange}
           >
-            <option value="capsules">Capsules</option>
+            <option value="launch">Últimos Lançamentos</option>
             <option value="cores">Cores</option>
             <option value="dragons">Dragons</option>
             <option value="history">History</option>
@@ -212,8 +212,6 @@ export const Container = memo(function Container() {
           <span>Lista de Gráficos</span>
         </div>
         {dustbins.map(({ accepts, lastDroppedItem }, index) => (
-          <>
-          {console.log(index)}
           <Dustbin
             accept={accepts}
             lastDroppedItem={lastDroppedItem}
@@ -221,7 +219,6 @@ export const Container = memo(function Container() {
             index={index}
             onDelete={onDelete2}
           />
-          </>
         ))}
 
         {/* Dustbin especial com '+' */}
