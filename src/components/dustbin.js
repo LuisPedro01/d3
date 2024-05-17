@@ -2,7 +2,8 @@ import React, { memo, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import * as d3 from 'd3';
 import axios from 'axios';
-import { AiTwotoneDelete } from "react-icons/ai";
+import { AiTwotoneDelete, AiOutlineReload } from "react-icons/ai";
+import { CiUndo } from "react-icons/ci";
 
 const style = {
   height: '280px',
@@ -49,7 +50,13 @@ export const Dustbin = memo(function Dustbin({
     backgroundColor = '#f0f0f0';
   }
 
-  async function fetchData(variavel, rocketNames, rocketCounts) {
+  const reloadFilter = (variavel) => {
+    console.log('variavel', variavel)
+    fetchData(variavel)
+    createChart(lastDroppedItem.selectedGraph, rocketData.names, rocketData.counts)
+  }
+
+  async function fetchData(variavel) {
     const startDate = new Date(variavel.startDate);
     const endDate = new Date(variavel.endDate);
 
@@ -62,7 +69,7 @@ export const Dustbin = memo(function Dustbin({
     const endMonth = (endDate?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
     const endDay = endDate?.getUTCDate().toString().padStart(2, '0');
     const endDateFormatted = `${endYear}-${endMonth}-${endDay}`
-
+// console.log(variavel)
     try {
         const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
             params: {
@@ -72,7 +79,8 @@ export const Dustbin = memo(function Dustbin({
         });
         const allLaunches = response.data;        
         const rocketCounts = {};
-        
+        // console.log(allLaunches.mission_name)
+        // console.log(allLaunches)
         allLaunches.forEach(launch => {
           const rocketName = launch.rocket.rocket_name;
           if (rocketCounts.hasOwnProperty(rocketName)) {
@@ -82,9 +90,9 @@ export const Dustbin = memo(function Dustbin({
           }
         });
         
-        for (const rocketName in rocketCounts) {
-          console.log(`${rocketName}: ${rocketCounts[rocketName]}`);
-        }
+        // for (const rocketName in rocketCounts) {
+        //   console.log(`${rocketName}: ${rocketCounts[rocketName]}`);
+        // }
         
         const rocketNames = Object.keys(rocketCounts);
         const rocketCountsArray = Object.values(rocketCounts);
@@ -99,7 +107,8 @@ export const Dustbin = memo(function Dustbin({
   const createChart = (lastDroppedItem, rocketNames, rocketCounts) => {
     let data;
     let drawChart;
-    switch (lastDroppedItem) {
+    fetchData(lastDroppedItem)
+    switch (lastDroppedItem.selectedGraph) {
       case "linhas":
         data = [0, 10, 15, 10, 25];
         drawChart = drawLineChart;
@@ -350,9 +359,9 @@ export const Dustbin = memo(function Dustbin({
       .text(rocketNames);
   };
 
-  if(lastDroppedItem){
-    fetchData(lastDroppedItem)
-  }
+  // if(lastDroppedItem){
+  //   fetchData(lastDroppedItem)
+  // }
 
   return (
     <div
@@ -362,6 +371,9 @@ export const Dustbin = memo(function Dustbin({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {lastDroppedItem && (
+        <AiOutlineReload style={{ float:'left', cursor: 'pointer', width: '15px', height: '15px' }} onClick={()=>reloadFilter(lastDroppedItem)}/>
+      )}
       {isHovered && (
         <div style={{ float: 'right', cursor: 'pointer', marginLeft: '-20px', marginBottom: '-1px' }} onClick={handleDelete}>
           {index >= 5 && (
@@ -369,11 +381,12 @@ export const Dustbin = memo(function Dustbin({
           )}
         </div>
       )}
-      {isActive ? 'Release to drop' : `Nome : ${lastDroppedItem?.name}`}
-      {lastDroppedItem && <p>Variável: {lastDroppedItem.selectedOption}</p>}
+      {!lastDroppedItem && <p style={{fontSize: '15px', marginTop: '140px', color: '#aeafb0'}}>Adicione aqui o seu gráfico!</p>}
+      {lastDroppedItem && <p>Nome : {lastDroppedItem?.name}</p>}
+      {lastDroppedItem && (<p>Variável: {lastDroppedItem.selectedOption}</p>)}
       {lastDroppedItem && (
         <>
-        <div dangerouslySetInnerHTML={{ __html: createChart(lastDroppedItem.selectedGraph, rocketData.names, rocketData.counts) }} />
+        <div dangerouslySetInnerHTML={{ __html: createChart(lastDroppedItem, rocketData.names, rocketData.counts) }} />
         {/* <div onClick={() => fetchData(lastDroppedItem)}>TESTAR API</div>
         {numLaunches !== null && <p>Número de lançamentos entre as datas: {numLaunches}</p>} */}
         </>

@@ -125,7 +125,7 @@ export const Container = memo(function Container() {
           />
           <span>Data Fim</span>
           <ReactDatePicker
-            selected={startDate}
+            selected={endDate}
             onChange={(date) => setEndDate(date)}
             dateFormat="dd/MM/yyyy"
             className='datePicker'
@@ -137,25 +137,15 @@ export const Container = memo(function Container() {
         <div
           style={{ display: "flex", marginTop: "20px", marginBottom: "20px", alignItems: 'center' }}
         >
-          <span>Routes</span>
+          <span>KPI's</span>
           <select 
             style={{width: '150px', height: '30px', borderRadius: '5px', marginLeft: '20px', border: '2px solid #9dadb3'}}
             value={selectedOption}
             onChange={handleSelectChange}
           >
-            <option value="launch">Últimos Lançamentos</option>
-            <option value="cores">Cores</option>
-            <option value="dragons">Dragons</option>
-            <option value="history">History</option>
-            <option value="info">Info</option>
-            <option value="landing_pads">Landing Pads</option>
-            <option value="launches">Launches</option>
-            <option value="launches_pads">Launches Pads</option>
-            <option value="missions">Missions</option>
-            <option value="payloads">Payloads</option>
-            <option value="rockets">Rockets</option>
-            <option value="roadster">Roadster</option>
-            <option value="ships">Ships</option>
+            <option value="launch">Nome dos Foguetões</option>
+            <option value="cores">Nome das Missiões</option>
+            <option value="dragons">Lugar de Lançamento</option>
           </select>
         </div>
 
@@ -164,7 +154,7 @@ export const Container = memo(function Container() {
         <div
           style={{ display: "flex", marginTop: "20px", marginBottom: "20px", alignItems: 'center' }}
         >
-          <span>Tipo de Gráfico</span>
+          <span>Gráficos</span>
           <select
             style={{ width: '150px', height: '30px', borderRadius: '5px', marginLeft: '20px', border: '2px solid #9dadb3' }}
             value={selectedGraph}
@@ -189,6 +179,7 @@ export const Container = memo(function Container() {
 
         {boxes.length > 0 ? 
           boxes.map(({ name, type }, index) => (
+            <>
             <Box
               name={name}
               startDate={startDate}
@@ -200,6 +191,8 @@ export const Container = memo(function Container() {
               isDropped={isDropped(name)}
               key={index}
             />
+            {console.log(startDate)}
+            </>
           )) : 
           <span style={{color: '#aeafb0'}}>Os seus gráficos aparecerão aqui...</span>
         }

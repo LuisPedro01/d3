@@ -28,7 +28,7 @@ export const Box = memo(function Box({ name, startDate, endDate, selectedOption,
   const handleDelete = () => {
     onDelete(name);
   };
-
+console.log('e aqui?', startDate)
   return (
     <div
       ref={drag}
