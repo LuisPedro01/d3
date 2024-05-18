@@ -80,6 +80,18 @@ export const Container = memo(function Container() {
       }
   };
 
+  const refreshGraphs = () => {
+    if(!hasErrors()){
+      setBoxes((prevBoxes) =>
+        update(prevBoxes, {
+          $push: [{ name: name, type:'TODOS', selectedOption: selectedOption, startDate: startDate, endDate: endDate}],
+        })
+        );
+        setName('');
+      }
+  };
+
+
   const updateGraph = () => {
     if (!hasErrors()) {
       const updatedBoxes = boxes.map((box) => {
@@ -107,11 +119,12 @@ export const Container = memo(function Container() {
     );
   };
 
-  const handleReload = (lastDroppedItem) => {
+  const handleReload = (lastDroppedItem, startDate) => {
     console.log('oi?', lastDroppedItem.startDate)
+    console.log('oi2222', startDate)
     setName(lastDroppedItem.name);
-    setStartDate(new Date(startDate));
-    setEndDate(new Date(endDate));
+    setStartDate(startDate);
+    setEndDate(endDate);
     setSelectedOption(lastDroppedItem.selectedOption);
     setSelectedGraph(lastDroppedItem.selectedGraph);
   };
@@ -195,7 +208,7 @@ export const Container = memo(function Container() {
             <span onClick={addNewGraph} style={{ color: '#ffff' }}>Criar novo gráfico</span>
           </div>
           <div style={{ marginBottom: "10px", cursor: "pointer", border: '2px solid #1ebffa', borderRadius: '5px', backgroundColor: '#2abff5', padding: '5px', width: '70%', justifyItems: 'center' }}>
-            <span onClick={addNewGraph} style={{ color: '#ffff' }}>Refresh</span>
+            <span onClick={refreshGraphs} style={{ color: '#ffff' }}>Refresh</span>
           </div>
         </div>
 
@@ -227,14 +240,18 @@ export const Container = memo(function Container() {
           <span>Lista de Gráficos</span>
         </div>
         {dustbins.map(({ accepts, lastDroppedItem }, index) => (
-          <Dustbin
-            accept={accepts}
-            lastDroppedItem={lastDroppedItem}
-            onDrop={(item) => handleDrop(index, item)}
-            index={index}
-            onDelete={onDelete2}
-            onReload={handleReload}
-          />
+          <>
+            <Dustbin
+              accept={accepts}
+              lastDroppedItem={lastDroppedItem}
+              onDrop={(item) => handleDrop(index, item)}
+              index={index}
+              onDelete={onDelete2}
+              onReload={handleReload}
+              startDate={startDate}
+            />
+            {console.log(startDate)}
+          </>
         ))}
 
         {/* Dustbin especial com '+' */}

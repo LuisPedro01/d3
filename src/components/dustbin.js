@@ -25,7 +25,8 @@ export const Dustbin = memo(function Dustbin({
   onDrop,
   onDelete,
   index,
-  onReload
+  onReload,
+  startDate
 }) {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept,
@@ -53,20 +54,30 @@ export const Dustbin = memo(function Dustbin({
     backgroundColor = '#f0f0f0';
   }
 
-  const reloadFilter = (variavel) => {
-    console.log('variavel', variavel)
-    fetchData(variavel).then((res)=>console.log('resposta', res))
+  const reloadFilter = (variavel, startDate1) => {
+    console.log('variavel', variavel, startDate1)
+    fetchData(variavel, startDate1).then((res)=>console.log('resposta', res))
   }
 
-  async function fetchData(variavel) {
-    console.log('variavel', variavel)
+  async function fetchData(variavel, startDate1) {
     const startDate = new Date(variavel.startDate);
     const endDate = new Date(variavel.endDate);
+let startDateFormatted
+    if(startDate1){
+      const startYear = startDate1?.getUTCFullYear();
+      const startMonth = (startDate1?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
+      const startDay = startDate1?.getUTCDate().toString().padStart(2, '0');
+      startDateFormatted = `${startYear}-${startMonth}-${startDay}`
+    } else {
+      const startYear = startDate?.getUTCFullYear() || startDate1?.getUTCFullYear();
+      const startMonth = (startDate?.getUTCMonth() + 1).toString().padStart(2, '0') || (startDate1?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
+      const startDay = startDate?.getUTCDate().toString().padStart(2, '0') || startDate1?.getUTCDate().toString().padStart(2, '0');
+      startDateFormatted = `${startYear}-${startMonth}-${startDay}`
+    }
 
-    const startYear = startDate?.getUTCFullYear();
-    const startMonth = (startDate?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
-    const startDay = startDate?.getUTCDate().toString().padStart(2, '0');
-    const startDateFormatted = `${startYear}-${startMonth}-${startDay}`
+    console.log('startDate1', startDate1)
+
+    console.log('startDateFormatted', startDateFormatted)
 
     const endYear = endDate?.getUTCFullYear();
     const endMonth = (endDate?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
@@ -401,10 +412,10 @@ export const Dustbin = memo(function Dustbin({
         <AiOutlineReload
           style={{ float: 'left', cursor: 'pointer', width: '15px', height: '15px' }}
           onClick={() => {
-            onReload(lastDroppedItem)
-            reloadFilter(lastDroppedItem)
-            console.log('obj', lastDroppedItem)
-            console.log('new obj', onReload(lastDroppedItem))
+            onReload(lastDroppedItem, startDate)
+            reloadFilter(lastDroppedItem, startDate)
+            console.log('obj', lastDroppedItem, startDate)
+            // console.log('new obj', onReload(lastDroppedItem))
           }}
         />
       )}
