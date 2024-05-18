@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 import * as d3 from 'd3';
 import axios from 'axios';
@@ -37,6 +37,8 @@ export const Dustbin = memo(function Dustbin({
   const [isHovered, setIsHovered] = useState(false);
   const [numLaunches, setNumLaunches] = useState(null);
   const [rocketData, setRocketData] = useState({ names: [], counts: [] });
+  const [chartHtml, setChartHtml] = useState('');
+  const isChartCreated = useRef(false);
 
   const handleDelete = () => {
     onDelete(index);
@@ -53,7 +55,6 @@ export const Dustbin = memo(function Dustbin({
   const reloadFilter = (variavel) => {
     console.log('variavel', variavel)
     fetchData(variavel)
-    createChart(lastDroppedItem.selectedGraph, rocketData.names, rocketData.counts)
   }
 
   async function fetchData(variavel) {
@@ -73,8 +74,8 @@ export const Dustbin = memo(function Dustbin({
     try {
         const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
             params: {
-                start: startDateFormatted, // Defina a data de início
-                end: endDateFormatted    // Defina a data de término
+                start: startDateFormatted,
+                end: endDateFormatted
             }
         });
         const allLaunches = response.data;        
@@ -97,8 +98,9 @@ export const Dustbin = memo(function Dustbin({
         const rocketNames = Object.keys(rocketCounts);
         const rocketCountsArray = Object.values(rocketCounts);
         setRocketData({ names: rocketNames, counts: rocketCountsArray });
-
-        setNumLaunches(allLaunches.length);
+        const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
+        setChartHtml(chart);
+        // setNumLaunches(allLaunches.length);
     } catch (error) {
         console.error('Erro ao buscar dados da API da SpaceX:', error);
     }
@@ -107,10 +109,11 @@ export const Dustbin = memo(function Dustbin({
   const createChart = (lastDroppedItem, rocketNames, rocketCounts) => {
     let data;
     let drawChart;
-    fetchData(lastDroppedItem)
+    console.log('??', rocketCounts, rocketNames)
+    //fetchData(lastDroppedItem)
     switch (lastDroppedItem.selectedGraph) {
       case "linhas":
-        data = [0, 10, 15, 10, 25];
+        //data = [0, 10, 15, 10, 25];
         drawChart = drawLineChart;
         break;
       case "barras":
@@ -122,11 +125,11 @@ export const Dustbin = memo(function Dustbin({
         drawChart = drawPizzaChart;
         break;
       case "bolhas":
-        data = [0, 10, 20, 5, 20];
+        //data = [0, 10, 20, 5, 20];
         drawChart = drawBolhaChart;
         break;
       case "donnut":
-        data = [10, 20, 30, 40, 50];
+        //data = [10, 20, 30, 40, 50];
         drawChart = drawDonnutChart;
         break;
       default:
@@ -197,6 +200,8 @@ export const Dustbin = memo(function Dustbin({
   };
 
   const drawBarChart = (svg, rocketNames, rocketCounts) => {
+    // console.log('names', rocketNames)
+    // console.log('count', rocketCounts)
     const margin = { top: 20, right: 0, bottom: 30, left: 35 };
     const width = 200 - margin.left - margin.right;
     const height = 250 - margin.top - margin.bottom;
@@ -275,47 +280,57 @@ export const Dustbin = memo(function Dustbin({
       .text(rocketNames);
   };
 
-  const drawBolhaChart = (svg, data) => {
-    const margin = { top: 10, right: 20, bottom: 50, left: 50 };
-    const width = +svg.attr("width") - margin.left - margin.right;
-    const height = +svg.attr("height") - margin.top - margin.bottom;
+  const drawBolhaChart = (svg, rocketNames, rocketCounts) => {
+    const width = 250;
+    const height = 250;
+    const radius = d3.scaleSqrt()
+      .domain([0, d3.max(rocketCounts)])
+      .range([0, 50]);
 
-    const xScale = d3.scaleLinear()
-      .domain([0, data.length])
-      .range([0, width]);
-    const yScale = d3.scaleLinear()
-      .domain([0, d3.max(data)])
-      .range([height, 0]);
+    const nodes = rocketNames.map((name, i) => ({
+      id: name,
+      radius: radius(rocketCounts[i]),
+      value: rocketCounts[i]
+    }));
 
-    svg.selectAll("circle")
-      .data(data)
+    const simulation = d3.forceSimulation(nodes)
+      .force('charge', d3.forceManyBody().strength(5))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('collision', d3.forceCollide().radius(d => d.radius + 1))
+      .on('tick', ticked);
+
+    const node = svg.selectAll('circle')
+      .data(nodes)
       .enter()
-      .append("circle")
-      .attr("cx", (d, i) => xScale(i) + 50)
-      .attr("cy", d => yScale(d) + 20)
-      .attr("r", d => d)
-      .attr("fill", "steelblue")
+      .append('circle')
+      .attr('r', d => d.radius)
+      .attr('fill', 'steelblue')
+      .call(d3.drag()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended));
 
-    svg.append("g")
-      .attr("transform", `translate(${margin.left}, ${height + margin.top})`)
-      .call(d3.axisBottom(xScale));
+    function ticked() {
+      node.attr('cx', d => d.x)
+        .attr('cy', d => d.y);
+    }
 
-    svg.append("text")
-      .attr("transform", `translate(${width / 2}, ${height + margin.top + 40})`)
-      .style("text-anchor", "middle")
-      .text("X Axis");
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
 
-    svg.append("g")
-      .attr("transform", `translate(${margin.left}, ${margin.top})`)
-      .call(d3.axisLeft(yScale));
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
 
-    svg.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", margin.left / 2 - 20)
-      .attr("x", 0 - (height / 2))
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .text("Y Axis");
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
   };
 
   const drawDonnutChart = (svg, rocketNames, rocketCounts) => {
@@ -363,6 +378,12 @@ export const Dustbin = memo(function Dustbin({
   //   fetchData(lastDroppedItem)
   // }
 
+  useEffect(() => {
+    if (lastDroppedItem) {
+      fetchData(lastDroppedItem);
+    }
+  }, [lastDroppedItem]);
+
   return (
     <div
       ref={drop}
@@ -372,7 +393,10 @@ export const Dustbin = memo(function Dustbin({
       onMouseLeave={() => setIsHovered(false)}
     >
       {lastDroppedItem && (
-        <AiOutlineReload style={{ float:'left', cursor: 'pointer', width: '15px', height: '15px' }} onClick={()=>reloadFilter(lastDroppedItem)}/>
+        <AiOutlineReload
+          style={{ float: 'left', cursor: 'pointer', width: '15px', height: '15px' }}
+          onClick={() => reloadFilter(lastDroppedItem)}
+        />
       )}
       {isHovered && (
         <div style={{ float: 'right', cursor: 'pointer', marginLeft: '-20px', marginBottom: '-1px' }} onClick={handleDelete}>
@@ -381,12 +405,14 @@ export const Dustbin = memo(function Dustbin({
           )}
         </div>
       )}
-      {!lastDroppedItem && <p style={{fontSize: '15px', marginTop: '140px', color: '#aeafb0'}}>Adicione aqui o seu gráfico!</p>}
+      {!lastDroppedItem && <p style={{ fontSize: '15px', marginTop: '140px', color: '#aeafb0' }}>Adicione aqui o seu gráfico!</p>}
       {lastDroppedItem && <p>Nome : {lastDroppedItem?.name}</p>}
-      {lastDroppedItem && (<p>Variável: {lastDroppedItem.selectedOption}</p>)}
+      {lastDroppedItem && <p>Variável: {lastDroppedItem.selectedOption}</p>}
       {lastDroppedItem && (
         <>
-          <div dangerouslySetInnerHTML={{ __html: createChart(lastDroppedItem, rocketData.names, rocketData.counts) }} />
+                  {rocketData.names.length > 0 && rocketData.counts.length > 0 && (
+          <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
+        )}
           <div onClick={() => fetchData(lastDroppedItem)}>
             TESTAR API
           </div>

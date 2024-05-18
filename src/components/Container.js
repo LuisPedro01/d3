@@ -191,7 +191,7 @@ export const Container = memo(function Container() {
               isDropped={isDropped(name)}
               key={index}
             />
-            {console.log(startDate)}
+            {/* {console.log(startDate)} */}
             </>
           )) : 
           <span style={{color: '#aeafb0'}}>Os seus gráficos aparecerão aqui...</span>
