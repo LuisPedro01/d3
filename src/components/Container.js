@@ -1,9 +1,11 @@
 import update from 'immutability-helper';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { Dustbin } from './dustbin.js';
 import { Box } from './Box.js';
 import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from './firebase';
 
 export const Container = memo(function Container() {
   const [dustbins, setDustbins] = useState([
@@ -129,6 +131,24 @@ export const Container = memo(function Container() {
     setSelectedGraph(lastDroppedItem.selectedGraph);
   };
 
+  const fetchCharts = async () => {
+    try {
+      const chartsCollection = collection(db, 'charts');
+      const chartsSnapshot = await getDocs(chartsCollection);
+      const chartsList = chartsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setBoxes(chartsList);
+    } catch (error) {
+      console.error("Erro ao buscar gráficos:", error);
+    }
+  };
+
+  useEffect(()=>{
+    fetchCharts();
+  }, [])
+
   return (
     <div style={{ display: "flex", width: "100%", height: "100%" }}>
       <div
@@ -203,12 +223,9 @@ export const Container = memo(function Container() {
         </div>
 
         {/* Criar Gráfico */}
-        <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
           <div style={{ marginBottom: "10px", cursor: "pointer", border: '2px solid #1ebffa', borderRadius: '5px', backgroundColor: '#2abff5', padding: '5px', width: '70%', justifyItems: 'center' }}>
             <span onClick={addNewGraph} style={{ color: '#ffff' }}>Criar novo gráfico</span>
-          </div>
-          <div style={{ marginBottom: "10px", cursor: "pointer", border: '2px solid #1ebffa', borderRadius: '5px', backgroundColor: '#2abff5', padding: '5px', width: '70%', justifyItems: 'center' }}>
-            <span onClick={refreshGraphs} style={{ color: '#ffff' }}>Refresh</span>
           </div>
         </div>
 
@@ -250,7 +267,6 @@ export const Container = memo(function Container() {
               onReload={handleReload}
               startDate={startDate}
             />
-            {console.log(startDate)}
           </>
         ))}
 

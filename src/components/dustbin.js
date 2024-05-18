@@ -4,6 +4,8 @@ import * as d3 from 'd3';
 import axios from 'axios';
 import { AiTwotoneDelete, AiOutlineReload } from "react-icons/ai";
 import { CiUndo } from "react-icons/ci";
+import { db, collection, addDoc } from './firebase';
+import { getDocs } from 'firebase/firestore';
 
 const style = {
   height: '280px',
@@ -56,14 +58,14 @@ export const Dustbin = memo(function Dustbin({
 
   const reloadFilter = (variavel, startDate1) => {
     console.log('variavel', variavel, startDate1)
-    fetchData(variavel, startDate1).then((res)=>console.log('resposta', res))
+    fetchData(variavel, startDate1).then((res) => console.log('resposta', res))
   }
 
   async function fetchData(variavel, startDate1) {
     const startDate = new Date(variavel.startDate);
     const endDate = new Date(variavel.endDate);
-let startDateFormatted
-    if(startDate1){
+    let startDateFormatted
+    if (startDate1) {
       const startYear = startDate1?.getUTCFullYear();
       const startMonth = (startDate1?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
       const startDay = startDate1?.getUTCDate().toString().padStart(2, '0');
@@ -75,52 +77,86 @@ let startDateFormatted
       startDateFormatted = `${startYear}-${startMonth}-${startDay}`
     }
 
-    console.log('startDate1', startDate1)
-
-    console.log('startDateFormatted', startDateFormatted)
-
     const endYear = endDate?.getUTCFullYear();
     const endMonth = (endDate?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
     const endDay = endDate?.getUTCDate().toString().padStart(2, '0');
     const endDateFormatted = `${endYear}-${endMonth}-${endDay}`
-// console.log(variavel)
+    // console.log(variavel)
     try {
-        const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
-            params: {
-                start: startDateFormatted,
-                end: endDateFormatted
-            }
-        });
-        const allLaunches = response.data;  
-        const rocketCounts = {};
-        // console.log(allLaunches.mission_name)
-        // console.log(allLaunches)
-        allLaunches.forEach(launch => {
-          const rocketName = launch.rocket.rocket_name;
-          if (rocketCounts.hasOwnProperty(rocketName)) {
-            rocketCounts[rocketName]++;
-          } else {
-            rocketCounts[rocketName] = 1;
-          }
-        });
-        console.log('rocketCounts', rocketCounts)      
-        // for (const rocketName in rocketCounts) {
-        //   console.log(`${rocketName}: ${rocketCounts[rocketName]}`);
-        // }
-        
-        const rocketNames = Object.keys(rocketCounts);
-        const rocketCountsArray = Object.values(rocketCounts);
-        console.log('rocketNames', rocketNames)      
-        console.log('rocketCountsArray', rocketCountsArray)      
+      const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
+        params: {
+          start: startDateFormatted,
+          end: endDateFormatted
+        }
+      });
+      const allLaunches = response.data;
+      const rocketCounts = {};
+      // console.log(allLaunches.mission_name)
+      // console.log(allLaunches)
+      allLaunches.forEach(launch => {
+        const rocketName = launch.rocket.rocket_name;
+        if (rocketCounts.hasOwnProperty(rocketName)) {
+          rocketCounts[rocketName]++;
+        } else {
+          rocketCounts[rocketName] = 1;
+        }
+      });
+      console.log('rocketCounts', rocketCounts)
+      // for (const rocketName in rocketCounts) {
+      //   console.log(`${rocketName}: ${rocketCounts[rocketName]}`);
+      // }
 
-        setRocketData({ names: rocketNames, counts: rocketCountsArray });
-        const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
-        setChartHtml(chart);
-        // setNumLaunches(allLaunches.length);
+      const rocketNames = Object.keys(rocketCounts);
+      const rocketCountsArray = Object.values(rocketCounts);
+      console.log('rocketNames', rocketNames)
+      console.log('rocketCountsArray', rocketCountsArray)
+
+      setRocketData({ names: rocketNames, counts: rocketCountsArray });
+      const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
+      setChartHtml(chart);
+      // setNumLaunches(allLaunches.length);
+      await saveChartToFirebase(lastDroppedItem, chart);
     } catch (error) {
-        console.error('Erro ao buscar dados da API da SpaceX:', error);
+      console.error('Erro ao buscar dados da API da SpaceX:', error);
     }
-}
+  }
+
+  const saveChartToFirebase = async (lastDroppedItem, chartHtml) => {
+    try {
+      await addDoc(collection(db, 'charts'), {
+        name: lastDroppedItem.name,
+        type: lastDroppedItem.selectedGraph,
+        kpi: lastDroppedItem.selectedOption,
+        chartHtml: chartHtml,
+        startDate: lastDroppedItem.startDate,
+        endDate: lastDroppedItem.endDate,
+
+        createdAt: new Date(),
+      });
+      console.log('Gráfico salvo no Firebase');
+    } catch (error) {
+      console.error('Erro ao salvar gráfico no Firebase:', error);
+    }
+  };
+
+  const fetchCharts = async () => {
+    try {
+      const chartsCollection = collection(db, 'charts');
+      const chartsSnapshot = await getDocs(chartsCollection);
+      const chartsList = chartsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      console.log(chartsList[0].chartHtml);
+      setChartHtml(chartsList[0].chartHtml);
+    } catch (error) {
+      console.error("Erro ao buscar gráficos:", error);
+    }
+  };
+
+  useEffect(()=>{
+    fetchCharts();
+  }, [])
 
   const createChart = (lastDroppedItem, rocketNames, rocketCounts) => {
     let data;
@@ -221,20 +257,20 @@ let startDateFormatted
     const margin = { top: 20, right: 0, bottom: 30, left: 35 };
     const width = 200 - margin.left - margin.right;
     const height = 250 - margin.top - margin.bottom;
-  
+
     const x = d3.scaleBand()
       .domain(rocketNames)
       .range([0, width])
       .padding(0.1);
-  
+
     const y = d3.scaleLinear()
       .domain([0, d3.max(rocketCounts)])
       .nice()
       .range([height, 0]);
-  
+
     const xAxis = d3.axisBottom(x);
     const yAxis = d3.axisLeft(y);
-  
+
     svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
       .call(xAxis)
@@ -243,11 +279,11 @@ let startDateFormatted
       .attr("dx", "-.8em")
       .attr("dy", ".15em")
       .attr("transform", "translate(30, 5)");
-  
+
     svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
       .call(yAxis);
-  
+
     svg.selectAll("rect")
       .data(rocketCounts)
       .enter().append("rect")
@@ -257,7 +293,7 @@ let startDateFormatted
       .attr("height", (d) => height - y(d))
       .attr("fill", "steelblue");
   };
-  
+
   const drawPizzaChart = (svg, rocketNames, rocketCounts) => {
     const pie = d3.pie();
     const arc = d3.arc().innerRadius(0).outerRadius(100);
@@ -431,9 +467,9 @@ let startDateFormatted
       {lastDroppedItem && <p>Variável: {lastDroppedItem.selectedOption}</p>}
       {lastDroppedItem && (
         <>
-                  {rocketData.names.length > 0 && rocketData.counts.length > 0 && (
-          <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
-        )}
+          {rocketData.names.length > 0 && rocketData.counts.length > 0 && (
+            <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
+          )}
           <div onClick={() => fetchData(lastDroppedItem)}>
             TESTAR API
           </div>
