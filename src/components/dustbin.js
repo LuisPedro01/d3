@@ -24,7 +24,8 @@ export const Dustbin = memo(function Dustbin({
   lastDroppedItem,
   onDrop,
   onDelete,
-  index
+  index,
+  onReload
 }) {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept,
@@ -54,10 +55,11 @@ export const Dustbin = memo(function Dustbin({
 
   const reloadFilter = (variavel) => {
     console.log('variavel', variavel)
-    fetchData(variavel)
+    fetchData(variavel).then((res)=>console.log('resposta', res))
   }
 
   async function fetchData(variavel) {
+    console.log('variavel', variavel)
     const startDate = new Date(variavel.startDate);
     const endDate = new Date(variavel.endDate);
 
@@ -78,7 +80,7 @@ export const Dustbin = memo(function Dustbin({
                 end: endDateFormatted
             }
         });
-        const allLaunches = response.data;        
+        const allLaunches = response.data;  
         const rocketCounts = {};
         // console.log(allLaunches.mission_name)
         // console.log(allLaunches)
@@ -90,13 +92,16 @@ export const Dustbin = memo(function Dustbin({
             rocketCounts[rocketName] = 1;
           }
         });
-        
+        console.log('rocketCounts', rocketCounts)      
         // for (const rocketName in rocketCounts) {
         //   console.log(`${rocketName}: ${rocketCounts[rocketName]}`);
         // }
         
         const rocketNames = Object.keys(rocketCounts);
         const rocketCountsArray = Object.values(rocketCounts);
+        console.log('rocketNames', rocketNames)      
+        console.log('rocketCountsArray', rocketCountsArray)      
+
         setRocketData({ names: rocketNames, counts: rocketCountsArray });
         const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
         setChartHtml(chart);
@@ -395,7 +400,12 @@ export const Dustbin = memo(function Dustbin({
       {lastDroppedItem && (
         <AiOutlineReload
           style={{ float: 'left', cursor: 'pointer', width: '15px', height: '15px' }}
-          onClick={() => reloadFilter(lastDroppedItem)}
+          onClick={() => {
+            onReload(lastDroppedItem)
+            reloadFilter(lastDroppedItem)
+            console.log('obj', lastDroppedItem)
+            console.log('new obj', onReload(lastDroppedItem))
+          }}
         />
       )}
       {isHovered && (

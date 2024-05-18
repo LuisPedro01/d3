@@ -80,6 +80,18 @@ export const Container = memo(function Container() {
       }
   };
 
+  const updateGraph = () => {
+    if (!hasErrors()) {
+      const updatedBoxes = boxes.map((box) => {
+        if (box.name === name) {
+          return { ...box, selectedOption, startDate, endDate, selectedGraph };
+        }
+        return box;
+      });
+      setBoxes(updatedBoxes);
+    }
+  };
+
   const hasErrors = () => {
     if(!name){
       alert('É necessário um nome!')
@@ -93,6 +105,15 @@ export const Container = memo(function Container() {
         $push: [{ accepts: ['TODOS'], lastDroppedItem: null }],
       })
     );
+  };
+
+  const handleReload = (lastDroppedItem) => {
+    console.log('oi?', lastDroppedItem.startDate)
+    setName(lastDroppedItem.name);
+    setStartDate(new Date(startDate));
+    setEndDate(new Date(endDate));
+    setSelectedOption(lastDroppedItem.selectedOption);
+    setSelectedGraph(lastDroppedItem.selectedGraph);
   };
 
   return (
@@ -109,9 +130,14 @@ export const Container = memo(function Container() {
         {/* Nome Gráfico */}
         <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: '15px' }}>
           <span>Nome do Gráfico</span>
-          <input type={'text'} value={name} style={{height: '20px', border: '2px solid #9dadb3', borderRadius: '5px', padding:'5px'}} onChange={(event) => setName(event.target.value)} placeholder={'Insira aqui o nome do gráfico'}></input>
+          <input
+            type="text"
+            value={name}
+            style={{ height: '20px', border: '2px solid #9dadb3', borderRadius: '5px', padding: '5px' }}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Insira aqui o nome do gráfico"
+          />
         </div>
-
 
         {/* Filtro Datas */}
         <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
@@ -120,7 +146,7 @@ export const Container = memo(function Container() {
             selected={startDate}
             onChange={(date) => setStartDate(date)}
             dateFormat="dd/MM/yyyy"
-            className='datePicker'
+            className="datePicker"
             maxDate={new Date("11-30-2020")}
           />
           <span>Data Fim</span>
@@ -128,18 +154,16 @@ export const Container = memo(function Container() {
             selected={endDate}
             onChange={(date) => setEndDate(date)}
             dateFormat="dd/MM/yyyy"
-            className='datePicker'
+            className="datePicker"
             maxDate={new Date("11-30-2020")}
           />
         </div>
 
         {/* Filtro tipo de Variável */}
-        <div
-          style={{ display: "flex", marginTop: "20px", marginBottom: "20px", alignItems: 'center' }}
-        >
+        <div style={{ display: "flex", marginTop: "20px", marginBottom: "20px", alignItems: 'center' }}>
           <span>KPI's</span>
-          <select 
-            style={{width: '150px', height: '30px', borderRadius: '5px', marginLeft: '20px', border: '2px solid #9dadb3'}}
+          <select
+            style={{ width: '150px', height: '30px', borderRadius: '5px', marginLeft: '20px', border: '2px solid #9dadb3' }}
             value={selectedOption}
             onChange={handleSelectChange}
           >
@@ -149,11 +173,8 @@ export const Container = memo(function Container() {
           </select>
         </div>
 
-
         {/* Filtro tipo de Gráfico */}
-        <div
-          style={{ display: "flex", marginTop: "20px", marginBottom: "20px", alignItems: 'center' }}
-        >
+        <div style={{ display: "flex", marginTop: "20px", marginBottom: "20px", alignItems: 'center' }}>
           <span>Gráficos</span>
           <select
             style={{ width: '150px', height: '30px', borderRadius: '5px', marginLeft: '20px', border: '2px solid #9dadb3' }}
@@ -169,35 +190,36 @@ export const Container = memo(function Container() {
         </div>
 
         {/* Criar Gráfico */}
-        <div style={{display: 'flex', justifyContent: 'center'}}>
+        <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ marginBottom: "10px", cursor: "pointer", border: '2px solid #1ebffa', borderRadius: '5px', backgroundColor: '#2abff5', padding: '5px', width: '70%', justifyItems: 'center' }}>
-            <span onClick={addNewGraph} style={{color: '#ffff'}}>Criar novo gráfico</span>
+            <span onClick={addNewGraph} style={{ color: '#ffff' }}>Criar novo gráfico</span>
+          </div>
+          <div style={{ marginBottom: "10px", cursor: "pointer", border: '2px solid #1ebffa', borderRadius: '5px', backgroundColor: '#2abff5', padding: '5px', width: '70%', justifyItems: 'center' }}>
+            <span onClick={addNewGraph} style={{ color: '#ffff' }}>Refresh</span>
           </div>
         </div>
 
-        <hr style={{width: '100%', marginBottom: '20px'}}></hr>
+        <hr style={{ width: '100%', marginBottom: '20px' }}></hr>
 
-        {boxes.length > 0 ? 
+        {boxes.length > 0 ?
           boxes.map(({ name, type }, index) => (
             <>
-            <Box
-              name={name}
-              startDate={startDate}
-              endDate={endDate}
-              selectedOption={selectedOption}
-              selectedGraph={selectedGraph}
-              onDelete={onDelete}
-              type={type}
-              isDropped={isDropped(name)}
-              key={index}
-            />
-            {/* {console.log(startDate)} */}
+              <Box
+                name={name}
+                startDate={startDate}
+                endDate={endDate}
+                selectedOption={selectedOption}
+                selectedGraph={selectedGraph}
+                onDelete={onDelete}
+                type={type}
+                isDropped={isDropped(name)}
+                key={index}
+              />
+              {/* {console.log(startDate)} */}
             </>
-          )) : 
-          <span style={{color: '#aeafb0'}}>Os seus gráficos aparecerão aqui...</span>
+          )) :
+          <span style={{ color: '#aeafb0' }}>Os seus gráficos aparecerão aqui...</span>
         }
-
-        
       </div>
 
       <div style={{ border: "1px solid" }}>
@@ -211,28 +233,28 @@ export const Container = memo(function Container() {
             onDrop={(item) => handleDrop(index, item)}
             index={index}
             onDelete={onDelete2}
+            onReload={handleReload}
           />
         ))}
 
         {/* Dustbin especial com '+' */}
         <div
           style={{
-              height: '280px',
-              width: '280px',
-              margin: '20px',
-              color: 'white',
-              padding: '10px',
-              textAlign: 'center',
-              fontSize: '12px',
-              lineHeight: 'normal',
-              float: 'left',
-              borderRadius: '10px',
-              border: '2px solid #000000',
-              // backgroundColor: '#aeafb0',
-              cursor: 'pointer',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center'   
+            height: '280px',
+            width: '280px',
+            margin: '20px',
+            color: 'white',
+            padding: '10px',
+            textAlign: 'center',
+            fontSize: '12px',
+            lineHeight: 'normal',
+            float: 'left',
+            borderRadius: '10px',
+            border: '2px solid #000000',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
           }}
           onClick={handleAddDustbin}
         >
