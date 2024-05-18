@@ -386,9 +386,10 @@ export const Dustbin = memo(function Dustbin({
       {lastDroppedItem && (<p>Variável: {lastDroppedItem.selectedOption}</p>)}
       {lastDroppedItem && (
         <>
-        <div dangerouslySetInnerHTML={{ __html: createChart(lastDroppedItem, rocketData.names, rocketData.counts) }} />
-        {/* <div onClick={() => fetchData(lastDroppedItem)}>TESTAR API</div>
-        {numLaunches !== null && <p>Número de lançamentos entre as datas: {numLaunches}</p>} */}
+          <div dangerouslySetInnerHTML={{ __html: createChart(lastDroppedItem, rocketData.names, rocketData.counts) }} />
+          <div onClick={() => fetchData(lastDroppedItem)}>
+            TESTAR API
+          </div>
         </>
       )}
     </div>
