@@ -429,7 +429,7 @@ export const Dustbin = memo(function Dustbin({
       .attr("x", 15)
       .attr("y", 5)
       .attr("dy", ".35em")
-      .text(rocketNames);
+      .text((d) => d); 
   };
 
   const drawBolhaChart = (svg, rocketNames, rocketCounts) => {
@@ -523,7 +523,7 @@ export const Dustbin = memo(function Dustbin({
       .attr("x", 15)
       .attr("y", 5)
       .attr("dy", ".35em")
-      .text(rocketNames);
+      .text((d) => d); 
   };
 
   useEffect(() => {
