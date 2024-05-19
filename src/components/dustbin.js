@@ -3,7 +3,6 @@ import { useDrop } from 'react-dnd';
 import * as d3 from 'd3';
 import axios from 'axios';
 import { AiTwotoneDelete, AiOutlineReload } from "react-icons/ai";
-import { CiUndo } from "react-icons/ci";
 import { db } from './firebase';
 import { getDocs, addDoc, collection } from 'firebase/firestore';
 
@@ -41,13 +40,10 @@ export const Dustbin = memo(function Dustbin({
       canDrop: monitor.canDrop(),
     }),
   });
-  const dustbinRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [numLaunches, setNumLaunches] = useState(null);
   const [rocketData, setRocketData] = useState({ names: [], counts: [] });
   const [chartHtml, setChartHtml] = useState([]);
   const [chartHtml1, setChartHtml1] = useState([]);
-  const isChartCreated = useRef(false);
   const [formDB, setFromDB] = useState(false)
 
   const handleDelete = () => {
@@ -534,51 +530,7 @@ export const Dustbin = memo(function Dustbin({
     if (lastDroppedItem) {
       fetchData(lastDroppedItem);
     }
-  }, [lastDroppedItem]);
-
-
-  async function fetchMissionCounts() {
-    try {
-      // Faz a requisição à API
-      const response = await axios.get('https://api.spacexdata.com/v3/launches',{
-        params:{
-          startDate: '11-30-2019',
-          endDate: '11-30-2020'
-        }
-      });
-      const data = response.data;
-  console.log(data)
-      // Inicializa as contagens de lançamentos bem-sucedidos e malsucedidos
-      let successCount = 0;
-      let failureCount = 0;
-  
-      // Itera sobre cada lançamento retornado pela API
-      data.forEach(launch => {
-        const isSuccess = launch.launch_success;
-  
-        if (isSuccess !== null && isSuccess !== undefined) {
-          if (isSuccess) {
-            // Incrementa a contagem para lançamentos bem-sucedidos
-            successCount++;
-          } else {
-            // Incrementa a contagem para lançamentos malsucedidos
-            failureCount++;
-          }
-        }
-      });
-
-      const obj = {successCounts: successCount, failureCounts: failureCount}
-  
-      console.log(obj)
-      // Retorna um objeto com as contagens de lançamentos bem-sucedidos e malsucedidos
-      return { successCounts: successCount, failureCounts: failureCount };
-    } catch (error) {
-      console.error('Erro ao buscar dados da API da SpaceX:', error);
-      // Retorna um objeto vazio em caso de erro
-      return { successCounts: 0, failureCounts: 0 };
-    }
-  }
-  
+  }, [lastDroppedItem]); 
   
   return (
     <div
@@ -594,8 +546,6 @@ export const Dustbin = memo(function Dustbin({
           onClick={() => {
             onReload(lastDroppedItem, startDate)
             reloadFilter(lastDroppedItem, startDate)
-            // console.log('obj', lastDroppedItem, startDate)
-            // console.log('new obj', onReload(lastDroppedItem))
           }}
         />
       )}
@@ -606,15 +556,7 @@ export const Dustbin = memo(function Dustbin({
           )}
         </div>
       )}
-      {/* {(lastDroppedItem === null && formDB != true) && (
-        <>
-        {console.log(lastDroppedItem)}
-        {console.log(formDB)}
-        <p style={{ fontSize: '15px', marginTop: '140px', color: '#aeafb0' }}>
-          Adicione aqui o seu gráfico!
-        </p>
-        </>
-      )} */}
+
       {lastDroppedItem && (
         <>
           <p>Nome : {lastDroppedItem?.name}</p>
@@ -641,16 +583,6 @@ export const Dustbin = memo(function Dustbin({
           })}
         </>
       )}
-
-      <div 
-      onClick={()=>{
-        fetchMissionCounts()
-        .then(launchSiteCounts => {
-          console.log(launchSiteCounts)
-        })
-      }}
-      >Testar api</div>
-
     </div>
   );
 });

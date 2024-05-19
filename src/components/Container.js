@@ -229,8 +229,8 @@ export const Container = memo(function Container() {
           >
             <option value="barras">Barras</option>
             <option value="linhas">Linhas</option>
-            <option value="pizza">Pizza</option>
-            <option value="bolhas">Bolhas</option>
+            <option value="pizza">Setores</option>
+            {/* <option value="bolhas">Bolhas</option> */}
             <option value="donnut">Donnut</option>
           </select>
         </div>
