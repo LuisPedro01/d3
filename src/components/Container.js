@@ -20,7 +20,7 @@ export const Container = memo(function Container() {
   const [startDate, setStartDate] = useState(new Date("11-30-2020"));
   const [endDate, setEndDate] = useState(new Date("11-30-2020"));
   const [name, setName] = useState('')
-  const [selectedOption, setSelectedOption] = useState('capsules');
+  const [selectedOption, setSelectedOption] = useState('launch');
   const [selectedGraph, setSelectedGraph] = useState('barras');
 
 
@@ -37,8 +37,6 @@ export const Container = memo(function Container() {
   };
 
   const deleteFromFirebase = async (id) => {
-    console.log("boxes", boxes);
-    console.log("boxesName", id);
     try {
       // Remove o gráfico do Firestore
       const chartDoc = doc(db, "charts", id);
@@ -217,7 +215,7 @@ export const Container = memo(function Container() {
           >
             <option value="launch">Nome dos Foguetões</option>
             <option value="cores">Nome das Missiões</option>
-            <option value="dragons">Lugar de Lançamento</option>
+            <option value="site">Lugar de Lançamento</option>
           </select>
         </div>
 

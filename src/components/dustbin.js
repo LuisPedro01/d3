@@ -87,35 +87,111 @@ export const Dustbin = memo(function Dustbin({
     const endMonth = (endDate?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
     const endDay = endDate?.getUTCDate().toString().padStart(2, '0');
     const endDateFormatted = `${endYear}-${endMonth}-${endDay}`
-    try {
-      const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
-        params: {
-          start: startDateFormatted,
-          end: endDateFormatted
-        }
-      });
-      const allLaunches = response.data;
-      const rocketCounts = {};
-      allLaunches.forEach(launch => {
-        const rocketName = launch.rocket.rocket_name;
-        if (rocketCounts.hasOwnProperty(rocketName)) {
-          rocketCounts[rocketName]++;
-        } else {
-          rocketCounts[rocketName] = 1;
-        }
-      });
-      const rocketNames = Object.keys(rocketCounts);
-      const rocketCountsArray = Object.values(rocketCounts);
 
-      setRocketData({ names: rocketNames, counts: rocketCountsArray });
-      const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
-      setChartHtml(chart);
-      // setNumLaunches(allLaunches.length);
-      if (lastDroppedItem) {
-        await saveChartToFirebase(lastDroppedItem, chart);
+    console.log('var-',variavel)
+    if(variavel.selectedOption === 'launch'){
+      try {
+        const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
+          params: {
+            start: startDateFormatted,
+            end: endDateFormatted
+          }
+        });
+        const allLaunches = response.data;
+        const rocketCounts = {};
+        allLaunches.forEach(launch => {
+          const rocketName = launch.rocket.rocket_name;
+          if (rocketCounts.hasOwnProperty(rocketName)) {
+            rocketCounts[rocketName]++;
+          } else {
+            rocketCounts[rocketName] = 1;
+          }
+        });
+        const rocketNames = Object.keys(rocketCounts);
+        const rocketCountsArray = Object.values(rocketCounts);
+  
+        setRocketData({ names: rocketNames, counts: rocketCountsArray });
+        const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
+        setChartHtml(chart);
+        console.log('char', chart)
+        // setNumLaunches(allLaunches.length);
+        if (lastDroppedItem) {
+          await saveChartToFirebase(lastDroppedItem, chart);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados da API da SpaceX:', error);
       }
-    } catch (error) {
-      console.error('Erro ao buscar dados da API da SpaceX:', error);
+    }
+    if (variavel.selectedOption === "site") {
+      try {
+        const response = await axios.get(
+          "https://api.spacexdata.com/v3/launches",
+          {
+            params: {
+              start: startDateFormatted,
+              end: endDateFormatted
+            }
+          }
+        );
+        const data = response.data;
+        const launchSiteCounts = {};
+        data.forEach((launch) => {
+          if (launch.launch_site && launch.launch_site.site_name) {
+            const siteName = launch.launch_site.site_name;
+            if (launchSiteCounts[siteName]) {
+              launchSiteCounts[siteName]++;
+            } else {
+              launchSiteCounts[siteName] = 1;
+            }
+          }
+        });
+        const rocketNames = Object.keys(launchSiteCounts);
+        const rocketCountsArray = Object.values(launchSiteCounts);
+  
+        setRocketData({ names: rocketNames, counts: rocketCountsArray });
+        const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
+        setChartHtml(chart);
+        // setNumLaunches(allLaunches.length);
+        if (lastDroppedItem) {
+          await saveChartToFirebase(lastDroppedItem, chart);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dados da API da SpaceX:", error);
+        return {};
+      }
+    }
+    if(variavel.selectedOption === 'dragons'){
+      try {
+        const response = await axios.get(`https://api.spacexdata.com/v3/dragons`, {
+          params: {
+            start: startDateFormatted,
+            end: endDateFormatted
+          }
+        });
+        const allLaunches = response.data;
+        const rocketCounts = {};
+        allLaunches.forEach(launch => {
+          const rocketName = launch.rocket.rocket_name;
+          if (rocketCounts.hasOwnProperty(rocketName)) {
+            rocketCounts[rocketName]++;
+          } else {
+            rocketCounts[rocketName] = 1;
+          }
+        });
+        const rocketNames = Object.keys(rocketCounts);
+        const rocketCountsArray = Object.values(rocketCounts);
+  
+        setRocketData({ names: rocketNames, counts: rocketCountsArray });
+        const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
+        setChartHtml(chart);
+        console.log('char', chart)
+        // setNumLaunches(allLaunches.length);
+        if (lastDroppedItem) {
+          await saveChartToFirebase(lastDroppedItem, chart);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados da API da SpaceX:', error);
+      }
     }
   }
 
@@ -153,13 +229,16 @@ export const Dustbin = memo(function Dustbin({
       });
   
       setChartHtml1(updatedCharts);
-      setFromDB(true);
+      if(updatedCharts.length === 0){
+        setFromDB(false)
+      } else{
+        setFromDB(true);
+      }
     } catch (error) {
       console.error("Erro ao buscar gráficos:", error);
     }
   };
   
-
   useEffect(()=>{
     fetchCharts();
   }, [])
@@ -432,16 +511,49 @@ export const Dustbin = memo(function Dustbin({
       .text(rocketNames);
   };
 
-  // if(lastDroppedItem){
-  //   fetchData(lastDroppedItem)
-  // }
-
   useEffect(() => {
     if (lastDroppedItem) {
       fetchData(lastDroppedItem);
     }
   }, [lastDroppedItem]);
 
+
+  async function fetchMissionCounts() {
+    try {
+      // Faz a requisição à API
+      const response = await axios.get('https://api.spacexdata.com/v3/launches',{
+        params: {
+          startDate: '11-30-2019',
+          endDate: '11-30-2020'
+        }
+      });
+      const data = response.data;
+  
+      // Objeto para armazenar a contagem de cada site de lançamento
+      const launchSiteCounts = {};
+  
+      // Itera sobre cada lançamento retornado pela API
+      data.forEach(launch => {
+        if (launch.launch_site && launch.launch_site.site_name) {
+          const siteName = launch.launch_site.site_name;
+  
+          // Incrementa a contagem para o nome do site de lançamento
+          if (launchSiteCounts[siteName]) {
+            launchSiteCounts[siteName]++;
+          } else {
+            launchSiteCounts[siteName] = 1;
+          }
+        }
+      });
+  
+      return launchSiteCounts;
+    } catch (error) {
+      console.error('Erro ao buscar dados da API da SpaceX:', error);
+      return {};
+    }
+  }
+  
+  
   return (
     <div
       ref={drop}
@@ -468,8 +580,15 @@ export const Dustbin = memo(function Dustbin({
           )}
         </div>
       )}
-      {!lastDroppedItem || !formDB && <p style={{ fontSize: '15px', marginTop: '140px', color: '#aeafb0' }}>Adicione aqui o seu gráfico!</p>}
-
+      {/* {(lastDroppedItem === null && formDB != true) && (
+        <>
+        {console.log(lastDroppedItem)}
+        {console.log(formDB)}
+        <p style={{ fontSize: '15px', marginTop: '140px', color: '#aeafb0' }}>
+          Adicione aqui o seu gráfico!
+        </p>
+        </>
+      )} */}
       {lastDroppedItem && (
         <>
           <p>Nome : {lastDroppedItem?.name}</p>
@@ -496,6 +615,15 @@ export const Dustbin = memo(function Dustbin({
           })}
         </>
       )}
+
+      <div 
+      onClick={()=>{
+        fetchMissionCounts()
+        .then(launchSiteCounts => {
+          console.log(launchSiteCounts)
+        })
+      }}
+      >Testar api</div>
 
     </div>
   );
