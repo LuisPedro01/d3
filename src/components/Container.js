@@ -228,7 +228,7 @@ export const Container = memo(function Container() {
             onChange={handleSelectChart}
           >
             <option value="barras">Barras</option>
-            <option value="linhas">Linhas</option>
+            {/* <option value="linhas">Linhas</option> */}
             <option value="pizza">Setores</option>
             {/* <option value="bolhas">Bolhas</option> */}
             <option value="donnut">Donnut</option>
