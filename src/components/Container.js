@@ -214,7 +214,7 @@ export const Container = memo(function Container() {
             onChange={handleSelectChange}
           >
             <option value="launch">Nome dos Foguetões</option>
-            <option value="cores">Nome das Missiões</option>
+            <option value="success">Sucesso de Lançamento</option>
             <option value="site">Lugar de Lançamento</option>
           </select>
         </div>

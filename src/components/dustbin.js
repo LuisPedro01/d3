@@ -88,7 +88,6 @@ export const Dustbin = memo(function Dustbin({
     const endDay = endDate?.getUTCDate().toString().padStart(2, '0');
     const endDateFormatted = `${endYear}-${endMonth}-${endDay}`
 
-    console.log('var-',variavel)
     if(variavel.selectedOption === 'launch'){
       try {
         const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
@@ -160,38 +159,58 @@ export const Dustbin = memo(function Dustbin({
         return {};
       }
     }
-    if(variavel.selectedOption === 'dragons'){
+    if(variavel.selectedOption === 'success'){
       try {
-        const response = await axios.get(`https://api.spacexdata.com/v3/dragons`, {
+        // Faz a requisição à API
+        const response = await axios.get('https://api.spacexdata.com/v3/launches', {
           params: {
             start: startDateFormatted,
             end: endDateFormatted
           }
         });
-        const allLaunches = response.data;
-        const rocketCounts = {};
-        allLaunches.forEach(launch => {
-          const rocketName = launch.rocket.rocket_name;
-          if (rocketCounts.hasOwnProperty(rocketName)) {
-            rocketCounts[rocketName]++;
-          } else {
-            rocketCounts[rocketName] = 1;
+        const data = response.data;
+      
+        let successCount = 0;
+        let failureCount = 0;
+    
+        // Itera sobre cada lançamento retornado pela API
+        data.forEach(launch => {
+          const isSuccess = launch.launch_success;
+    
+          if (isSuccess !== null && isSuccess !== undefined) {
+            if (isSuccess) {
+              // Incrementa a contagem para lançamentos bem-sucedidos
+              successCount++;
+            } else {
+              // Incrementa a contagem para lançamentos malsucedidos
+              failureCount++;
+            }
           }
         });
-        const rocketNames = Object.keys(rocketCounts);
-        const rocketCountsArray = Object.values(rocketCounts);
   
+        const obj = {Sucesso: successCount, Falha: failureCount}
+          
+        // Define os nomes e contagens para o gráfico
+        const rocketNames = Object.keys(obj);
+        const rocketCountsArray = Object.values(obj);
+      
+        // Atualiza os estados
         setRocketData({ names: rocketNames, counts: rocketCountsArray });
         const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
         setChartHtml(chart);
-        console.log('char', chart)
         // setNumLaunches(allLaunches.length);
         if (lastDroppedItem) {
           await saveChartToFirebase(lastDroppedItem, chart);
         }
+      
+        // Retorna o objeto com as contagens de lançamentos bem-sucedidos e malsucedidos
+        return launchSiteCounts;
       } catch (error) {
         console.error('Erro ao buscar dados da API da SpaceX:', error);
+        // Retorna um objeto vazio em caso de erro
+        return { true: 0, false: 0 };
       }
+      
     }
   }
 
@@ -522,34 +541,41 @@ export const Dustbin = memo(function Dustbin({
     try {
       // Faz a requisição à API
       const response = await axios.get('https://api.spacexdata.com/v3/launches',{
-        params: {
+        params:{
           startDate: '11-30-2019',
           endDate: '11-30-2020'
         }
       });
       const data = response.data;
-  
-      // Objeto para armazenar a contagem de cada site de lançamento
-      const launchSiteCounts = {};
+  console.log(data)
+      // Inicializa as contagens de lançamentos bem-sucedidos e malsucedidos
+      let successCount = 0;
+      let failureCount = 0;
   
       // Itera sobre cada lançamento retornado pela API
       data.forEach(launch => {
-        if (launch.launch_site && launch.launch_site.site_name) {
-          const siteName = launch.launch_site.site_name;
+        const isSuccess = launch.launch_success;
   
-          // Incrementa a contagem para o nome do site de lançamento
-          if (launchSiteCounts[siteName]) {
-            launchSiteCounts[siteName]++;
+        if (isSuccess !== null && isSuccess !== undefined) {
+          if (isSuccess) {
+            // Incrementa a contagem para lançamentos bem-sucedidos
+            successCount++;
           } else {
-            launchSiteCounts[siteName] = 1;
+            // Incrementa a contagem para lançamentos malsucedidos
+            failureCount++;
           }
         }
       });
+
+      const obj = {successCounts: successCount, failureCounts: failureCount}
   
-      return launchSiteCounts;
+      console.log(obj)
+      // Retorna um objeto com as contagens de lançamentos bem-sucedidos e malsucedidos
+      return { successCounts: successCount, failureCounts: failureCount };
     } catch (error) {
       console.error('Erro ao buscar dados da API da SpaceX:', error);
-      return {};
+      // Retorna um objeto vazio em caso de erro
+      return { successCounts: 0, failureCounts: 0 };
     }
   }
   
