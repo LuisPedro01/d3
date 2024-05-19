@@ -110,9 +110,9 @@ export const Dustbin = memo(function Dustbin({
       const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
       setChartHtml(chart);
       // setNumLaunches(allLaunches.length);
-      // if (lastDroppedItem) {
-      //   await saveChartToFirebase(lastDroppedItem, chart);
-      // }
+      if (lastDroppedItem) {
+        await saveChartToFirebase(lastDroppedItem, chart);
+      }
     } catch (error) {
       console.error('Erro ao buscar dados da API da SpaceX:', error);
     }
@@ -137,7 +137,6 @@ export const Dustbin = memo(function Dustbin({
   };
 
   const fetchCharts = async () => {
-    console.log('quantas vezes')
     try {
       const chartsCollection = collection(db, 'charts');
       const chartsSnapshot = await getDocs(chartsCollection);
@@ -145,21 +144,20 @@ export const Dustbin = memo(function Dustbin({
         id: doc.id,
         ...doc.data()
       }));
-      //console.log(chartsList[0].chartHtml);
+  
+      const updatedCharts = new Array(chartsList.length).fill(null);
+
       chartsList.forEach((obj, index) => {
-        setChartHtml(prevCharts => {
-          const updatedCharts = [prevCharts];
-          updatedCharts[index] = obj; // Atualiza o gráfico na posição correta
-          console.log(updatedCharts);
-          console.log('prev',prevCharts);
-          setChartHtml(updatedCharts)
-        });
+        updatedCharts[index] = obj;
       });
+  
+      setChartHtml(updatedCharts);
       setFromDB(true);
     } catch (error) {
       console.error("Erro ao buscar gráficos:", error);
     }
   };
+  
 
   useEffect(()=>{
     fetchCharts();
@@ -451,14 +449,13 @@ export const Dustbin = memo(function Dustbin({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* {console.log('teste posição', index)} */}
       {lastDroppedItem && (
         <AiOutlineReload
           style={{ float: 'left', cursor: 'pointer', width: '15px', height: '15px' }}
           onClick={() => {
             onReload(lastDroppedItem, startDate)
             reloadFilter(lastDroppedItem, startDate)
-            console.log('obj', lastDroppedItem, startDate)
+            // console.log('obj', lastDroppedItem, startDate)
             // console.log('new obj', onReload(lastDroppedItem))
           }}
         />
@@ -484,29 +481,21 @@ export const Dustbin = memo(function Dustbin({
 
       {formDB && chartHtml && (
         <>
-        {console.log('OBJ', chartHtml)}
-          <p>Nome : {chartHtml[0]?.name}</p>
-          <p>Variável: {chartHtml[0]?.kpi}</p>
-          <div dangerouslySetInnerHTML={{ __html: chartHtml[0]?.chartHtml }} />
+          {chartHtml.map((obj, objIndex) => {
+            if (objIndex === index) {
+              return (
+                <React.Fragment key={obj?.id}>
+                  <p>Nome : {obj?.name}</p>
+                  <p>Variável: {obj?.kpi}</p>
+                  <div dangerouslySetInnerHTML={{ __html: obj?.chartHtml }} />
+                </React.Fragment>
+              );
+            }
+            return null;
+          })}
         </>
       )}
 
-      {/* {lastDroppedItem && <p>Nome : {lastDroppedItem?.name}</p>}
-      {lastDroppedItem && <p>Variável: {lastDroppedItem.selectedOption}</p>}
-      {lastDroppedItem && (
-        <>
-          {rocketData.names.length > 0 && rocketData.counts.length > 0 && (
-            <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
-          )}
-        </>
-      )} */}
-          {/* {formDB && (
-            <>
-              {console.log('fromDB->', formDB)}
-              {console.log('chartHtml->', chartHtml)}
-              <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
-            </>
-          )} */}
     </div>
   );
 });
