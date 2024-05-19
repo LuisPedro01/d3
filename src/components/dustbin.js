@@ -28,16 +28,20 @@ export const Dustbin = memo(function Dustbin({
   onDelete,
   index,
   onReload,
-  startDate
+  startDate,
 }) {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept,
-    drop: onDrop,
+    drop: (item) => {
+      fetchData(item, startDate);
+      onDrop(item);
+    },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
     }),
   });
+  const dustbinRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
   const [numLaunches, setNumLaunches] = useState(null);
   const [rocketData, setRocketData] = useState({ names: [], counts: [] });
@@ -81,7 +85,6 @@ export const Dustbin = memo(function Dustbin({
     const endMonth = (endDate?.getUTCMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 pois o mês é base 0
     const endDay = endDate?.getUTCDate().toString().padStart(2, '0');
     const endDateFormatted = `${endYear}-${endMonth}-${endDay}`
-    // console.log(variavel)
     try {
       const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
         params: {
@@ -91,8 +94,6 @@ export const Dustbin = memo(function Dustbin({
       });
       const allLaunches = response.data;
       const rocketCounts = {};
-      // console.log(allLaunches.mission_name)
-      // console.log(allLaunches)
       allLaunches.forEach(launch => {
         const rocketName = launch.rocket.rocket_name;
         if (rocketCounts.hasOwnProperty(rocketName)) {
@@ -101,21 +102,16 @@ export const Dustbin = memo(function Dustbin({
           rocketCounts[rocketName] = 1;
         }
       });
-      console.log('rocketCounts', rocketCounts)
-      // for (const rocketName in rocketCounts) {
-      //   console.log(`${rocketName}: ${rocketCounts[rocketName]}`);
-      // }
-
       const rocketNames = Object.keys(rocketCounts);
       const rocketCountsArray = Object.values(rocketCounts);
-      console.log('rocketNames', rocketNames)
-      console.log('rocketCountsArray', rocketCountsArray)
 
       setRocketData({ names: rocketNames, counts: rocketCountsArray });
       const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
       setChartHtml(chart);
       // setNumLaunches(allLaunches.length);
-      await saveChartToFirebase(lastDroppedItem, chart);
+      if (lastDroppedItem) {
+        await saveChartToFirebase(lastDroppedItem, chart);
+      }
     } catch (error) {
       console.error('Erro ao buscar dados da API da SpaceX:', error);
     }
@@ -130,8 +126,8 @@ export const Dustbin = memo(function Dustbin({
         chartHtml: chartHtml,
         startDate: lastDroppedItem.startDate,
         endDate: lastDroppedItem.endDate,
-
         createdAt: new Date(),
+        index: index
       });
       console.log('Gráfico salvo no Firebase');
     } catch (error) {
@@ -147,8 +143,8 @@ export const Dustbin = memo(function Dustbin({
         id: doc.id,
         ...doc.data()
       }));
-      console.log(chartsList[0].chartHtml);
-      setChartHtml(chartsList[0].chartHtml);
+      //console.log(chartsList[0].chartHtml);
+      setChartHtml(chartsList[index].chartHtml);
     } catch (error) {
       console.error("Erro ao buscar gráficos:", error);
     }
@@ -436,6 +432,14 @@ export const Dustbin = memo(function Dustbin({
     }
   }, [lastDroppedItem]);
 
+  useEffect(() => {
+    if (dustbinRef.current) {
+      const position = dustbinRef.current.getBoundingClientRect();
+      console.log('Dustbin position:', position);
+      // position.top, position.left, position.right, position.bottom
+    }
+  }, []);
+
   return (
     <div
       ref={drop}
@@ -444,6 +448,7 @@ export const Dustbin = memo(function Dustbin({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* {console.log('teste posição', index)} */}
       {lastDroppedItem && (
         <AiOutlineReload
           style={{ float: 'left', cursor: 'pointer', width: '15px', height: '15px' }}
