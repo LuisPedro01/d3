@@ -12,11 +12,11 @@ const style = {
   borderRadius: '10px'
 };
 
-export const Box = memo(function Box({ name, startDate, endDate, selectedOption, selectedGraph, type, isDropped, onDelete }) {
+export const Box = memo(function Box({ name, startDate, endDate, selectedOption, selectedGraph, type, isDropped, onDelete, id }) {
   const [{ opacity }, drag] = useDrag(
     () => ({
       type,
-      item: { name, startDate, endDate, selectedOption, selectedGraph },
+      item: { name, startDate, endDate, selectedOption, selectedGraph, id },
       collect: (monitor) => ({
         opacity: monitor.isDragging() ? 0.4 : 1,
       }),
@@ -25,8 +25,9 @@ export const Box = memo(function Box({ name, startDate, endDate, selectedOption,
   );
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleDelete = () => {
-    onDelete(name);
+  const handleDelete = (e) => {
+    const item = { name, startDate, endDate, selectedOption, selectedGraph, type, id };
+    onDelete(name, id);
   };
 //console.log('e aqui?', startDate)
   return (

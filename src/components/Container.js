@@ -4,7 +4,7 @@ import { Dustbin } from './dustbin.js';
 import { Box } from './Box.js';
 import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from './firebase';
 
 export const Container = memo(function Container() {
@@ -36,7 +36,22 @@ export const Container = memo(function Container() {
     setSelectedGraph(event.target.value);
   };
 
-  const onDelete = (boxName) => {
+  const deleteFromFirebase = async (id) => {
+    console.log("boxes", boxes);
+    console.log("boxesName", id);
+    try {
+      // Remove o gráfico do Firestore
+      const chartDoc = doc(db, "charts", id);
+      await deleteDoc(chartDoc);
+      console.log(`Gráfico com id ${id} removido`);
+
+    } catch (error) {
+      console.error("Erro ao remover gráfico:", error);
+    }
+  };
+
+  const onDelete = (boxName, id) => {
+    deleteFromFirebase(id)
     setBoxes((prevBoxes) =>
       prevBoxes.filter((box) => box.name !== boxName)
     );
@@ -244,6 +259,7 @@ export const Container = memo(function Container() {
                 type={type}
                 isDropped={isDropped(name)}
                 key={index}
+                id={boxes[index].id}
               />
               {/* {console.log(startDate)} */}
             </>
