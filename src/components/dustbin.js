@@ -4,8 +4,8 @@ import * as d3 from 'd3';
 import axios from 'axios';
 import { AiTwotoneDelete, AiOutlineReload } from "react-icons/ai";
 import { CiUndo } from "react-icons/ci";
-import { db, collection, addDoc } from './firebase';
-import { getDocs } from 'firebase/firestore';
+import { db } from './firebase';
+import { getDocs, addDoc, collection } from 'firebase/firestore';
 
 const style = {
   height: '280px',
@@ -47,6 +47,7 @@ export const Dustbin = memo(function Dustbin({
   const [rocketData, setRocketData] = useState({ names: [], counts: [] });
   const [chartHtml, setChartHtml] = useState([]);
   const isChartCreated = useRef(false);
+  const [formDB, setFromDB] = useState(false)
 
   const handleDelete = () => {
     onDelete(index);
@@ -109,9 +110,9 @@ export const Dustbin = memo(function Dustbin({
       const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
       setChartHtml(chart);
       // setNumLaunches(allLaunches.length);
-      if (lastDroppedItem) {
-        await saveChartToFirebase(lastDroppedItem, chart);
-      }
+      // if (lastDroppedItem) {
+      //   await saveChartToFirebase(lastDroppedItem, chart);
+      // }
     } catch (error) {
       console.error('Erro ao buscar dados da API da SpaceX:', error);
     }
@@ -146,12 +147,15 @@ export const Dustbin = memo(function Dustbin({
       }));
       //console.log(chartsList[0].chartHtml);
       chartsList.forEach((obj, index) => {
-        // setChartHtml(prevCharts => {
-        //   const updatedCharts = [...prevCharts];
-        //   updatedCharts[index] = obj.chartHtml; // Atualiza o gráfico na posição correta
-        //   //console.log(updatedCharts);
-        // });
+        setChartHtml(prevCharts => {
+          const updatedCharts = [prevCharts];
+          updatedCharts[index] = obj; // Atualiza o gráfico na posição correta
+          console.log(updatedCharts);
+          console.log('prev',prevCharts);
+          setChartHtml(updatedCharts)
+        });
       });
+      setFromDB(true);
     } catch (error) {
       console.error("Erro ao buscar gráficos:", error);
     }
@@ -466,8 +470,28 @@ export const Dustbin = memo(function Dustbin({
           )}
         </div>
       )}
-      {!lastDroppedItem && <p style={{ fontSize: '15px', marginTop: '140px', color: '#aeafb0' }}>Adicione aqui o seu gráfico!</p>}
-      {lastDroppedItem && <p>Nome : {lastDroppedItem?.name}</p>}
+      {!lastDroppedItem || !formDB && <p style={{ fontSize: '15px', marginTop: '140px', color: '#aeafb0' }}>Adicione aqui o seu gráfico!</p>}
+
+      {lastDroppedItem && (
+        <>
+          <p>Nome : {lastDroppedItem?.name}</p>
+          <p>Variável: {lastDroppedItem.selectedOption}</p>
+          {rocketData.names.length > 0 && rocketData.counts.length > 0 && (
+            <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
+          )}
+        </>
+      )}
+
+      {formDB && chartHtml && (
+        <>
+        {console.log('OBJ', chartHtml)}
+          <p>Nome : {chartHtml[0]?.name}</p>
+          <p>Variável: {chartHtml[0]?.kpi}</p>
+          <div dangerouslySetInnerHTML={{ __html: chartHtml[0]?.chartHtml }} />
+        </>
+      )}
+
+      {/* {lastDroppedItem && <p>Nome : {lastDroppedItem?.name}</p>}
       {lastDroppedItem && <p>Variável: {lastDroppedItem.selectedOption}</p>}
       {lastDroppedItem && (
         <>
@@ -475,7 +499,14 @@ export const Dustbin = memo(function Dustbin({
             <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
           )}
         </>
-      )}
+      )} */}
+          {/* {formDB && (
+            <>
+              {console.log('fromDB->', formDB)}
+              {console.log('chartHtml->', chartHtml)}
+              <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
+            </>
+          )} */}
     </div>
   );
 });
