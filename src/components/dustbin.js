@@ -45,7 +45,7 @@ export const Dustbin = memo(function Dustbin({
   const [isHovered, setIsHovered] = useState(false);
   const [numLaunches, setNumLaunches] = useState(null);
   const [rocketData, setRocketData] = useState({ names: [], counts: [] });
-  const [chartHtml, setChartHtml] = useState('');
+  const [chartHtml, setChartHtml] = useState([]);
   const isChartCreated = useRef(false);
 
   const handleDelete = () => {
@@ -136,6 +136,7 @@ export const Dustbin = memo(function Dustbin({
   };
 
   const fetchCharts = async () => {
+    console.log('quantas vezes')
     try {
       const chartsCollection = collection(db, 'charts');
       const chartsSnapshot = await getDocs(chartsCollection);
@@ -144,7 +145,13 @@ export const Dustbin = memo(function Dustbin({
         ...doc.data()
       }));
       //console.log(chartsList[0].chartHtml);
-      setChartHtml(chartsList[index].chartHtml);
+      chartsList.forEach((obj, index) => {
+        // setChartHtml(prevCharts => {
+        //   const updatedCharts = [...prevCharts];
+        //   updatedCharts[index] = obj.chartHtml; // Atualiza o gráfico na posição correta
+        //   //console.log(updatedCharts);
+        // });
+      });
     } catch (error) {
       console.error("Erro ao buscar gráficos:", error);
     }
@@ -157,7 +164,7 @@ export const Dustbin = memo(function Dustbin({
   const createChart = (lastDroppedItem, rocketNames, rocketCounts) => {
     let data;
     let drawChart;
-    console.log('??', rocketCounts, rocketNames)
+    // console.log('??', rocketCounts, rocketNames)
     //fetchData(lastDroppedItem)
     switch (lastDroppedItem.selectedGraph) {
       case "linhas":
@@ -432,14 +439,6 @@ export const Dustbin = memo(function Dustbin({
     }
   }, [lastDroppedItem]);
 
-  useEffect(() => {
-    if (dustbinRef.current) {
-      const position = dustbinRef.current.getBoundingClientRect();
-      console.log('Dustbin position:', position);
-      // position.top, position.left, position.right, position.bottom
-    }
-  }, []);
-
   return (
     <div
       ref={drop}
@@ -475,9 +474,6 @@ export const Dustbin = memo(function Dustbin({
           {rocketData.names.length > 0 && rocketData.counts.length > 0 && (
             <div dangerouslySetInnerHTML={{ __html: chartHtml }} />
           )}
-          <div onClick={() => fetchData(lastDroppedItem)}>
-            TESTAR API
-          </div>
         </>
       )}
     </div>
