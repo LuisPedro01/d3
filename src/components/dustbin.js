@@ -46,6 +46,7 @@ export const Dustbin = memo(function Dustbin({
   const [numLaunches, setNumLaunches] = useState(null);
   const [rocketData, setRocketData] = useState({ names: [], counts: [] });
   const [chartHtml, setChartHtml] = useState([]);
+  const [chartHtml1, setChartHtml1] = useState([]);
   const isChartCreated = useRef(false);
   const [formDB, setFromDB] = useState(false)
 
@@ -151,7 +152,7 @@ export const Dustbin = memo(function Dustbin({
         updatedCharts[index] = obj;
       });
   
-      setChartHtml(updatedCharts);
+      setChartHtml1(updatedCharts);
       setFromDB(true);
     } catch (error) {
       console.error("Erro ao buscar gráficos:", error);
@@ -479,9 +480,9 @@ export const Dustbin = memo(function Dustbin({
         </>
       )}
 
-      {formDB && chartHtml && (
+      {formDB && chartHtml1 && (
         <>
-          {chartHtml.map((obj, objIndex) => {
+          {chartHtml1?.map((obj, objIndex) => {
             if (objIndex === index) {
               return (
                 <React.Fragment key={obj?.id}>
