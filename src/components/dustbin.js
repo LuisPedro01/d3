@@ -165,7 +165,7 @@ export const Dustbin = memo(function Dustbin({
           }
         });
         const data = response.data;
-      
+      console.log('data',data)
         let successCount = 0;
         let failureCount = 0;
     
@@ -183,6 +183,9 @@ export const Dustbin = memo(function Dustbin({
             }
           }
         });
+
+        console.log('sucesso', successCount)
+        console.log('falha', failureCount)
   
         const obj = {Sucesso: successCount, Falha: failureCount}
           
@@ -200,7 +203,7 @@ export const Dustbin = memo(function Dustbin({
         }
       
         // Retorna o objeto com as contagens de lançamentos bem-sucedidos e malsucedidos
-        return launchSiteCounts;
+        //return launchSiteCounts;
       } catch (error) {
         console.error('Erro ao buscar dados da API da SpaceX:', error);
         // Retorna um objeto vazio em caso de erro
