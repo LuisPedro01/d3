@@ -95,30 +95,6 @@ export const Container = memo(function Container() {
       }
   };
 
-  const refreshGraphs = () => {
-    if(!hasErrors()){
-      setBoxes((prevBoxes) =>
-        update(prevBoxes, {
-          $push: [{ name: name, type:'TODOS', selectedOption: selectedOption, startDate: startDate, endDate: endDate}],
-        })
-        );
-        setName('');
-      }
-  };
-
-
-  const updateGraph = () => {
-    if (!hasErrors()) {
-      const updatedBoxes = boxes.map((box) => {
-        if (box.name === name) {
-          return { ...box, selectedOption, startDate, endDate, selectedGraph };
-        }
-        return box;
-      });
-      setBoxes(updatedBoxes);
-    }
-  };
-
   const hasErrors = (checkDuplicateName) => {
     if (!name) {
       alert('É necessário um nome!');
