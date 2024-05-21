@@ -26,10 +26,9 @@ export const Box = memo(function Box({ name, startDate, endDate, selectedOption,
   const [isHovered, setIsHovered] = useState(false);
 
   const handleDelete = (e) => {
-    const item = { name, startDate, endDate, selectedOption, selectedGraph, type, id };
     onDelete(name, id);
   };
-//console.log('e aqui?', startDate)
+
   return (
     <div
       ref={drag}

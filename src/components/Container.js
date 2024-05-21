@@ -38,7 +38,6 @@ export const Container = memo(function Container() {
 
   const deleteFromFirebase = async (id) => {
     try {
-      // Remove o gráfico do Firestore
       const chartDoc = doc(db, "charts", id);
       await deleteDoc(chartDoc);
       console.log(`Gráfico com id ${id} removido`);
@@ -118,8 +117,6 @@ export const Container = memo(function Container() {
   };
 
   const handleReload = (lastDroppedItem, startDate) => {
-    console.log('oi?', lastDroppedItem.startDate)
-    console.log('oi2222', startDate)
     setName(lastDroppedItem.name);
     setStartDate(startDate);
     setEndDate(endDate);

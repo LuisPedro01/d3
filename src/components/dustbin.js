@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState, useRef } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import * as d3 from 'd3';
 import axios from 'axios';
@@ -59,7 +59,6 @@ export const Dustbin = memo(function Dustbin({
   }
 
   const reloadFilter = (variavel, startDate1) => {
-    console.log('variavel', variavel, startDate1)
     fetchData(variavel, startDate1).then((res) => console.log('resposta', res))
   }
 
@@ -108,8 +107,6 @@ export const Dustbin = memo(function Dustbin({
         setRocketData({ names: rocketNames, counts: rocketCountsArray });
         const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
         setChartHtml(chart);
-        console.log('char', chart)
-        // setNumLaunches(allLaunches.length);
         if (lastDroppedItem) {
           await saveChartToFirebase(lastDroppedItem, chart);
         }
@@ -146,7 +143,6 @@ export const Dustbin = memo(function Dustbin({
         setRocketData({ names: rocketNames, counts: rocketCountsArray });
         const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
         setChartHtml(chart);
-        // setNumLaunches(allLaunches.length);
         if (lastDroppedItem) {
           await saveChartToFirebase(lastDroppedItem, chart);
         }
@@ -157,7 +153,6 @@ export const Dustbin = memo(function Dustbin({
     }
     if(variavel.selectedOption === 'success'){
       try {
-        // Faz a requisição à API
         const response = await axios.get('https://api.spacexdata.com/v3/launches', {
           params: {
             start: startDateFormatted,
@@ -165,48 +160,35 @@ export const Dustbin = memo(function Dustbin({
           }
         });
         const data = response.data;
-      console.log('data',data)
         let successCount = 0;
         let failureCount = 0;
     
-        // Itera sobre cada lançamento retornado pela API
         data.forEach(launch => {
           const isSuccess = launch.launch_success;
     
           if (isSuccess !== null && isSuccess !== undefined) {
             if (isSuccess) {
-              // Incrementa a contagem para lançamentos bem-sucedidos
               successCount++;
             } else {
-              // Incrementa a contagem para lançamentos malsucedidos
               failureCount++;
             }
           }
         });
-
-        console.log('sucesso', successCount)
-        console.log('falha', failureCount)
-  
+ 
         const obj = {Sucesso: successCount, Falha: failureCount}
           
-        // Define os nomes e contagens para o gráfico
         const rocketNames = Object.keys(obj);
         const rocketCountsArray = Object.values(obj);
       
-        // Atualiza os estados
         setRocketData({ names: rocketNames, counts: rocketCountsArray });
         const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
         setChartHtml(chart);
-        // setNumLaunches(allLaunches.length);
         if (lastDroppedItem) {
           await saveChartToFirebase(lastDroppedItem, chart);
         }
       
-        // Retorna o objeto com as contagens de lançamentos bem-sucedidos e malsucedidos
-        //return launchSiteCounts;
       } catch (error) {
         console.error('Erro ao buscar dados da API da SpaceX:', error);
-        // Retorna um objeto vazio em caso de erro
         return { true: 0, false: 0 };
       }
       
@@ -262,29 +244,22 @@ export const Dustbin = memo(function Dustbin({
   }, [])
 
   const createChart = (lastDroppedItem, rocketNames, rocketCounts) => {
-    let data;
     let drawChart;
-    // console.log('??', rocketCounts, rocketNames)
-    //fetchData(lastDroppedItem)
+
     switch (lastDroppedItem.selectedGraph) {
       case "linhas":
-        //data = [0, 10, 15, 10, 25];
         drawChart = drawLineChart;
         break;
       case "barras":
-        // data = [10, 20, 30, 40, 50];
         drawChart = drawBarChart;
         break;
       case "pizza":
-        // data = [10, 20, 30, 40, 50];
         drawChart = drawPizzaChart;
         break;
       case "bolhas":
-        //data = [0, 10, 20, 5, 20];
         drawChart = drawBolhaChart;
         break;
       case "donnut":
-        //data = [10, 20, 30, 40, 50];
         drawChart = drawDonnutChart;
         break;
       default:
@@ -355,8 +330,6 @@ export const Dustbin = memo(function Dustbin({
   };
 
   const drawBarChart = (svg, rocketNames, rocketCounts) => {
-    // console.log('names', rocketNames)
-    // console.log('count', rocketCounts)
     const margin = { top: 20, right: 0, bottom: 30, left: 35 };
     const width = 200 - margin.left - margin.right;
     const height = 250 - margin.top - margin.bottom;
