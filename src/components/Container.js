@@ -85,7 +85,7 @@ export const Container = memo(function Container() {
   );
 
   const addNewGraph = () => {
-    if(!hasErrors()){
+    if(!hasErrors(true)){
       setBoxes((prevBoxes) =>
         update(prevBoxes, {
           $push: [{ name: name, type:'TODOS', selectedOption: selectedOption, startDate: startDate, endDate: endDate}],
@@ -119,12 +119,19 @@ export const Container = memo(function Container() {
     }
   };
 
-  const hasErrors = () => {
-    if(!name){
-      alert('É necessário um nome!')
-      return true
+  const hasErrors = (checkDuplicateName) => {
+    if (!name) {
+      alert('É necessário um nome!');
+      return true;
     }
-  }
+
+    if (checkDuplicateName && boxes.some((box) => box.name === name)) {
+      alert('Não podem existir Gráficos com o mesmo nome!');
+      return true;
+    }
+
+    return false;
+  };
 
   const handleAddDustbin = () => {
     setDustbins((prevDustbins) =>
