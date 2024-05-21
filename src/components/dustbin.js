@@ -244,6 +244,9 @@ export const Dustbin = memo(function Dustbin({
   }, [])
 
   const createChart = (lastDroppedItem, rocketNames, rocketCounts) => {
+    if (rocketNames.length === 0 || rocketCounts.length === 0) {
+      return `<div style="color: red; text-align: center; margin-top: 20px;">Não existem dados disponíveis para criar o gráfico.</div>`;
+    }
     let drawChart;
 
     switch (lastDroppedItem.selectedGraph) {
