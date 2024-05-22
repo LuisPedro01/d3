@@ -83,7 +83,7 @@ export const Dustbin = memo(function Dustbin({
     const endDay = endDate?.getUTCDate().toString().padStart(2, '0');
     const endDateFormatted = `${endYear}-${endMonth}-${endDay}`
 
-    if(variavel.selectedOption === 'launch'){
+    if (variavel.selectedOption === 'launch') {
       try {
         const response = await axios.get(`https://api.spacexdata.com/v3/launches`, {
           params: {
@@ -103,7 +103,7 @@ export const Dustbin = memo(function Dustbin({
         });
         const rocketNames = Object.keys(rocketCounts);
         const rocketCountsArray = Object.values(rocketCounts);
-  
+
         setRocketData({ names: rocketNames, counts: rocketCountsArray });
         const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
         setChartHtml(chart);
@@ -139,7 +139,7 @@ export const Dustbin = memo(function Dustbin({
         });
         const rocketNames = Object.keys(launchSiteCounts);
         const rocketCountsArray = Object.values(launchSiteCounts);
-  
+
         setRocketData({ names: rocketNames, counts: rocketCountsArray });
         const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
         setChartHtml(chart);
@@ -151,7 +151,7 @@ export const Dustbin = memo(function Dustbin({
         return {};
       }
     }
-    if(variavel.selectedOption === 'success'){
+    if (variavel.selectedOption === 'success') {
       try {
         const response = await axios.get('https://api.spacexdata.com/v3/launches', {
           params: {
@@ -162,10 +162,10 @@ export const Dustbin = memo(function Dustbin({
         const data = response.data;
         let successCount = 0;
         let failureCount = 0;
-    
+
         data.forEach(launch => {
           const isSuccess = launch.launch_success;
-    
+
           if (isSuccess !== null && isSuccess !== undefined) {
             if (isSuccess) {
               successCount++;
@@ -174,24 +174,24 @@ export const Dustbin = memo(function Dustbin({
             }
           }
         });
- 
-        const obj = {Sucesso: successCount, Falha: failureCount}
-          
+
+        const obj = { Sucesso: successCount, Falha: failureCount }
+
         const rocketNames = Object.keys(obj);
         const rocketCountsArray = Object.values(obj);
-      
+
         setRocketData({ names: rocketNames, counts: rocketCountsArray });
         const chart = createChart(lastDroppedItem, rocketNames, rocketCountsArray);
         setChartHtml(chart);
         if (lastDroppedItem) {
           await saveChartToFirebase(lastDroppedItem, chart);
         }
-      
+
       } catch (error) {
         console.error('Erro ao buscar dados da API da SpaceX:', error);
         return { true: 0, false: 0 };
       }
-      
+
     }
   }
 
@@ -221,25 +221,25 @@ export const Dustbin = memo(function Dustbin({
         id: doc.id,
         ...doc.data()
       }));
-  
+
       const updatedCharts = new Array(chartsList.length).fill(null);
 
       chartsList.forEach((obj, index) => {
         updatedCharts[index] = obj;
       });
-  
+
       setChartHtml1(updatedCharts);
-      if(updatedCharts.length === 0){
+      if (updatedCharts.length === 0) {
         setFromDB(false)
-      } else{
+      } else {
         setFromDB(true);
       }
     } catch (error) {
       console.error("Erro ao buscar gráficos:", error);
     }
   };
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     fetchCharts();
   }, [])
 
@@ -386,6 +386,18 @@ export const Dustbin = memo(function Dustbin({
       .attr("fill", (d, i) => color(i))
       .attr("transform", `translate(130, 135)`);
 
+    // Adiciona os números dentro dos setores
+    svg.selectAll("text")
+      .data(pieData)
+      .enter()
+      .append("text")
+      .attr("transform", d => `translate(${arc.centroid(d)}) translate(130, 135)`)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "middle")
+      .style("fill", "#fff")
+      .text(d => d.data);
+
+
     // Adiciona a legenda
     const legend = svg.append("g")
       .attr("transform", "translate(0, 10) scale(0.8)")
@@ -408,7 +420,7 @@ export const Dustbin = memo(function Dustbin({
       .attr("x", 15)
       .attr("y", 5)
       .attr("dy", ".35em")
-      .text((d) => d); 
+      .text((d) => d);
   };
 
   const drawBolhaChart = (svg, rocketNames, rocketCounts) => {
@@ -470,7 +482,7 @@ export const Dustbin = memo(function Dustbin({
       .innerRadius(50)
       .outerRadius(100);
     const color = d3.scaleOrdinal(d3.schemeCategory10);
-
+  
     // Adiciona os arcos ao gráfico
     svg.selectAll("path")
       .data(donnutData)
@@ -479,7 +491,18 @@ export const Dustbin = memo(function Dustbin({
       .attr("d", arc)
       .attr("fill", (d, i) => color(i))
       .attr("transform", "translate(130, 135)");
-
+  
+    // Adiciona os números dentro dos setores
+    svg.selectAll("text")
+      .data(donnutData)
+      .enter()
+      .append("text")
+      .attr("transform", d => `translate(${arc.centroid(d)}) translate(130, 135)`)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "middle")
+      .style("fill", "#fff")
+      .text(d => d.data);
+  
     // Adiciona a legenda
     const legend = svg.append("g")
       .attr("transform", "translate(0, 10) scale(0.8)")
@@ -489,28 +512,29 @@ export const Dustbin = memo(function Dustbin({
       .append("g")
       .attr("class", "legend")
       .attr("transform", (d, i) => `translate(0, ${i * 20})`);
-
+  
     // Adiciona quadrados coloridos à legenda
     legend.append("rect")
       .attr("x", 0)
       .attr("width", 10)
       .attr("height", 10)
       .attr("fill", (d, i) => color(i));
-
+  
     // Adiciona texto à legenda
     legend.append("text")
       .attr("x", 15)
       .attr("y", 5)
       .attr("dy", ".35em")
-      .text((d) => d); 
+      .text((d) => d);
   };
+  
 
   useEffect(() => {
     if (lastDroppedItem) {
       fetchData(lastDroppedItem);
     }
-  }, [lastDroppedItem]); 
-  
+  }, [lastDroppedItem]);
+
   return (
     <div
       ref={drop}
